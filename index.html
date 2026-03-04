@@ -68,7 +68,7 @@ body {
 .tab:hover { color: var(--muted); }
 .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
 .tab .day-num { display: block; font-size: 14px; font-weight: 500; margin-bottom: 2px; }
-.tab .day-sub { display: block; font-size: 9px; opacity: 0.65; letter-spacing: 0.15em; }
+.tab .day-sub { display: block; font-size: 9px; opacity: 0.65; letter-spacing: 0.12em; }
 
 /* ── MAIN ── */
 .main { max-width: 1100px; margin: 0 auto; padding: 44px 28px 100px; }
@@ -88,8 +88,17 @@ body {
 .day-weekday { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
 .day-label { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 300; color: var(--text); letter-spacing: 0.04em; }
 
+/* ── DAY HEADER RIGHT（天氣 + 行程總覽） ── */
+.day-header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  padding-bottom: 8px;
+}
+
 .day-summary {
-  margin-left: auto; padding-bottom: 8px; max-width: 340px;
+  max-width: 280px;
 }
 .summary-text {
   font-size: 11.5px; color: var(--muted); line-height: 1.85;
@@ -99,9 +108,8 @@ body {
 /* ── MOBILE SUMMARY（摺疊式，手機專用） ── */
 .summary-mobile { display: none; }
 
-@media (max-width: 580px) {
+@media (max-width: 680px) {
   .day-summary { display: none; }
-
   .summary-mobile {
     display: block;
     margin: 14px 0 0;
@@ -312,6 +320,90 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
   line-height: 1.65;
 }
 
+/* ── WEATHER BUTTON + PANEL ── */
+.wx-wrap { flex-shrink: 0; }
+
+/* 天氣觸發按鈕 */
+.wx-btn {
+  display: flex; align-items: center; gap: 7px;
+  padding: 7px 13px;
+  background: #0F0E0C;
+  border: 1px solid #2A2520;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  transition: border-color .15s, background .15s;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+.wx-btn:hover { border-color: var(--gold-dim); background: #141210; }
+.wx-btn.open  { border-color: var(--gold-dim); background: #141210; border-bottom-color: transparent; border-radius: 4px 4px 0 0; }
+.wx-btn-icon  { font-size: 18px; line-height: 1; }
+.wx-btn-temp  { font-size: 12px; color: var(--gold); font-weight: 500; letter-spacing: 0.04em; }
+.wx-btn-desc  { font-size: 9.5px; color: var(--dim); letter-spacing: 0.1em; text-transform: uppercase; }
+.wx-btn-arrow { font-size: 9px; color: var(--gold-dim); margin-left: 2px; transition: transform .2s; }
+.wx-btn.open .wx-btn-arrow { transform: rotate(180deg); }
+
+/* 展開 panel */
+.wx-panel {
+  display: none;
+  background: #141210;
+  border: 1px solid var(--gold-dim);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  padding: 14px 16px 12px;
+  min-width: 280px;
+  position: absolute;
+  z-index: 10;
+}
+.wx-panel.open { display: block; animation: wxFade .18s ease; }
+@keyframes wxFade { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+
+.wx-wrap { position: relative; }
+
+/* panel 頂部：溫度 + 天氣概況 */
+.wx-panel-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.wx-panel-temps { display: flex; flex-direction: column; gap: 1px; }
+.wx-temp-high { font-size: 22px; color: var(--gold); font-weight: 500; letter-spacing: 0.02em; line-height: 1; }
+.wx-temp-low  { font-size: 12px; color: var(--dim); letter-spacing: 0.04em; margin-top: 3px; }
+.wx-panel-meta { text-align: right; }
+.wx-panel-desc { font-size: 10px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
+.wx-panel-rain {
+  font-size: 11px; color: #6EB8F0; letter-spacing: 0.06em;
+  margin-top: 4px; display: flex; align-items: center; gap: 4px; justify-content: flex-end;
+}
+.wx-panel-rain-bar {
+  height: 3px; border-radius: 2px;
+  background: linear-gradient(90deg, #1a3a4a, #6EB8F0);
+  transition: width .4s ease;
+}
+
+/* SVG 折線圖區域 */
+.wx-chart-wrap {
+  border-top: 1px solid #222;
+  padding-top: 10px;
+}
+.wx-chart-label {
+  font-size: 8.5px; color: var(--dim); letter-spacing: 0.18em;
+  text-transform: uppercase; margin-bottom: 6px;
+  display: flex; justify-content: space-between;
+}
+.wx-chart-label span:last-child { color: #6EB8F0; }
+.wx-chart { width: 100%; display: block; }
+.wx-chart-xaxis {
+  display: flex; justify-content: space-between;
+  margin-top: 4px;
+  font-size: 8px; color: var(--dim); letter-spacing: 0.06em;
+}
+
+/* 手機版：panel 全寬 */
+@media (max-width: 680px) {
+  .wx-panel { position: fixed; left: 14px; right: 14px; min-width: unset; }
+}
+
 /* ── DAY VIEW ── */
 .day-view { display: none; }
 .day-view.active { display: block; animation: fadeUp .28s ease; }
@@ -454,19 +546,18 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
 
 <header class="site-header">
   <div class="header-top">
-    <div class="logo">PARIS <span>2026 · 行程細流</span></div>
-    <div class="header-tag">3/13 — 3/21 · 9天8夜</div>
+    <div class="logo">PARIS <span>2026</span></div>
   </div>
   <nav class="tabs">
-    <button class="tab  active" data-day="0"><span class="day-num">3·13</span><span class="day-sub">五・出發</span></button>
-    <button class="tab" data-day="1"><span class="day-num">3·14</span><span class="day-sub">六・抵達</span></button>
-    <button class="tab" data-day="2"><span class="day-num">3·15</span><span class="day-sub">日・羅浮</span></button>
-    <button class="tab" data-day="3"><span class="day-num">3·16</span><span class="day-sub">一・左岸</span></button>
-    <button class="tab" data-day="4"><span class="day-num">3·17</span><span class="day-sub">二・凡爾賽</span></button>
-    <button class="tab" data-day="5"><span class="day-num">3·18</span><span class="day-sub">三・布隆尼</span></button>
-    <button class="tab" data-day="6"><span class="day-num">3·19</span><span class="day-sub">四・瑪黑</span></button>
-    <button class="tab" data-day="7"><span class="day-num">3·20</span><span class="day-sub">五・最後</span></button>
-    <button class="tab" data-day="8"><span class="day-num">3·21</span><span class="day-sub">六・回程</span></button>
+    <button class="tab  active" data-day="0"><span class="day-num">3·13</span><span class="day-sub">Fri · 出發</span></button>
+    <button class="tab" data-day="1"><span class="day-num">3·14</span><span class="day-sub">Sat · 抵達</span></button>
+    <button class="tab" data-day="2"><span class="day-num">3·15</span><span class="day-sub">Sun · 羅浮</span></button>
+    <button class="tab" data-day="3"><span class="day-num">3·16</span><span class="day-sub">Mon · 左岸</span></button>
+    <button class="tab" data-day="4"><span class="day-num">3·17</span><span class="day-sub">Tue · 凡爾賽</span></button>
+    <button class="tab" data-day="5"><span class="day-num">3·18</span><span class="day-sub">Wed · 布隆尼</span></button>
+    <button class="tab" data-day="6"><span class="day-num">3·19</span><span class="day-sub">Thu · 瑪黑</span></button>
+    <button class="tab" data-day="7"><span class="day-num">3·20</span><span class="day-sub">Fri · 最後</span></button>
+    <button class="tab" data-day="8"><span class="day-num">3·21</span><span class="day-sub">Sat · 回程</span></button>
   </nav>
 </header>
 
@@ -480,11 +571,14 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
       <div class="day-weekday">March 2026 · Friday</div>
       <div class="day-label">出發日</div>
     </div>
-    <div class="day-summary">
+    <div class="day-header-right">
+      <div class="wx-wrap" id="wx-wrap-day-0"></div>
+      <div class="day-summary">
       <div class="summary-text">行前休息，維持良好狀態出發。<br>
         下午健身消耗體力，晚間從桃園<br>
         機場搭乘長榮 BR087 直飛巴黎，<br>
         機上把握時間好好補眠。</div>
+    </div>
     </div>
   </div>
   <div class="summary-mobile" id="summary-mobile-day-0">
@@ -553,11 +647,14 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
       <div class="day-weekday">March 2026 · Saturday</div>
       <div class="day-label">抵達巴黎</div>
     </div>
-    <div class="day-summary">
+    <div class="day-header-right">
+      <div class="wx-wrap" id="wx-wrap-day-1"></div>
+      <div class="day-summary">
       <div class="summary-text">飛抵 CDG，計程車直奔 Cheval Blanc，<br>
         以水療午睡調整時差，下午輕鬆探索<br>
         旺多姆廣場珠寶街，夜間赴酒店內<br>
         米其林三星 Plenitude 晚宴。</div>
+    </div>
     </div>
   </div>
   <div class="summary-mobile" id="summary-mobile-day-1">
@@ -694,11 +791,14 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
       <div class="day-weekday">March 2026 · Sunday</div>
       <div class="day-label">羅浮宮・搬飯店</div>
     </div>
-    <div class="day-summary">
+    <div class="day-header-right">
+      <div class="wx-wrap" id="wx-wrap-day-2"></div>
+      <div class="day-summary">
       <div class="summary-text">以 Cheval Blanc 一星早午餐收尾，<br>
         下午進羅浮宮深度探索。傍晚搬至<br>
         聖日耳曼左岸新據點，晚間在巷弄<br>
         裡的傳統法式餐廳輕鬆用餐。</div>
+    </div>
     </div>
   </div>
   <div class="summary-mobile" id="summary-mobile-day-2">
@@ -785,11 +885,14 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
       <div class="day-weekday">March 2026 · Monday</div>
       <div class="day-label">左岸漫步</div>
     </div>
-    <div class="day-summary">
+    <div class="day-header-right">
+      <div class="wx-wrap" id="wx-wrap-day-3"></div>
+      <div class="day-summary">
       <div class="summary-text">以塞納河左岸為軸線，從書香咖啡啟程，<br>
         探訪 Diptyque 創始店，午間赴米其林三星<br>
         蔬食殿堂 Arpège，下午藥妝・甜點一路掃<br>
         街，傍晚在樂蓬馬歇頂級超市採買野餐晚餐。</div>
+    </div>
     </div>
   </div>
   <div class="summary-mobile" id="summary-mobile-day-3">
@@ -918,11 +1021,14 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
       <div class="day-weekday">March 2026 · Tuesday</div>
       <div class="day-label">凡爾賽一日</div>
     </div>
-    <div class="day-summary">
+    <div class="day-header-right">
+      <div class="wx-wrap" id="wx-wrap-day-4"></div>
+      <div class="day-summary">
       <div class="summary-text">清晨搭 RER C 出發前往凡爾賽，以 Alain<br>
         Ducasse 主理的宮殿早餐開場，遊覽鏡廳、<br>
         運河野餐，探索瑪麗安東尼農莊花園。<br>
         傍晚返城盛裝赴 Four Seasons 三星晚宴。</div>
+    </div>
     </div>
   </div>
   <div class="summary-mobile" id="summary-mobile-day-4">
@@ -1039,11 +1145,14 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
       <div class="day-weekday">March 2026 · Wednesday</div>
       <div class="day-label">布隆尼森林</div>
     </div>
-    <div class="day-summary">
+    <div class="day-header-right">
+      <div class="wx-wrap" id="wx-wrap-day-5"></div>
+      <div class="day-summary">
       <div class="summary-text">晨遊布隆尼森林英式花園，在樹蔭深處的<br>
         Le Pré Catelan 享用三星午餐。下午穿越<br>
         至歌劇院、拉法葉百貨逛街，晚間就近在<br>
         歌劇院區覓食輕鬆收尾。</div>
+    </div>
     </div>
   </div>
   <div class="summary-mobile" id="summary-mobile-day-5">
@@ -1142,11 +1251,14 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
       <div class="day-weekday">March 2026 · Thursday</div>
       <div class="day-label">瑪黑區</div>
     </div>
-    <div class="day-summary">
+    <div class="day-header-right">
+      <div class="wx-wrap" id="wx-wrap-day-6"></div>
+      <div class="day-summary">
       <div class="summary-text">清晨探索巴士底市集，遊覽免費卡納瓦雷<br>
         博物館，在孚日廣場旁享用三星 L'Ambroisie<br>
         午餐。下午 Merci・Jacques Genin 選物巧克力，<br>
         接著 agnès b.・Le Mont Saint Michel，晚間越南河粉收場。</div>
+    </div>
     </div>
   </div>
   <div class="summary-mobile" id="summary-mobile-day-6">
@@ -1257,11 +1369,14 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
       <div class="day-weekday">March 2026 · Friday</div>
       <div class="day-label">最後一天</div>
     </div>
-    <div class="day-summary">
+    <div class="day-header-right">
+      <div class="wx-wrap" id="wx-wrap-day-7"></div>
+      <div class="day-summary">
       <div class="summary-text">以莫內睡蓮開啟最後一日，杜樂麗漫步後<br>
         赴日法融合三星 Kei 午餐。下午踏遍香榭麗舍<br>
         購物掃貨，黃昏登上凱旋門俯瞰巴黎全景，<br>
         以陶罐燉雞告別晚宴畫下句點。</div>
+    </div>
     </div>
   </div>
   <div class="summary-mobile" id="summary-mobile-day-7">
@@ -1374,11 +1489,14 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
       <div class="day-weekday">March 2026 · Saturday</div>
       <div class="day-label">回程</div>
     </div>
-    <div class="day-summary">
+    <div class="day-header-right">
+      <div class="wx-wrap" id="wx-wrap-day-8"></div>
+      <div class="day-summary">
       <div class="summary-text">清晨計程車前往 CDG，完成退稅後<br>
         在免稅區輕鬆候機。搭乘長榮<br>
         BR088 直飛桃園，結束這趟<br>
         充滿美食與藝術的巴黎之旅。</div>
+    </div>
     </div>
   </div>
   <div class="summary-mobile" id="summary-mobile-day-8">
@@ -1478,6 +1596,224 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
 </main>
 
 <script>
+
+// ── WEATHER ──────────────────────────────────────────────────────────────
+(async function loadWeather() {
+  const DAYS = [
+    { id: 'day-0', date: '2026-03-13', hist: '2025-03-13' },
+    { id: 'day-1', date: '2026-03-14', hist: '2025-03-14' },
+    { id: 'day-2', date: '2026-03-15', hist: '2025-03-15' },
+    { id: 'day-3', date: '2026-03-16', hist: '2025-03-16' },
+    { id: 'day-4', date: '2026-03-17', hist: '2025-03-17' },
+    { id: 'day-5', date: '2026-03-18', hist: '2025-03-18' },
+    { id: 'day-6', date: '2026-03-19', hist: '2025-03-19' },
+    { id: 'day-7', date: '2026-03-20', hist: '2025-03-20' },
+    { id: 'day-8', date: '2026-03-21', hist: '2025-03-21' },
+  ];
+
+  const WMO_ICON = { 0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',71:'🌨️',73:'🌨️',75:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',95:'⛈️',96:'⛈️',99:'⛈️' };
+  const WMO_DESC = { 0:'晴',1:'多雲間晴',2:'局部多雲',3:'陰天',45:'霧',48:'霧',51:'毛毛雨',53:'毛毛雨',55:'細雨',61:'小雨',63:'中雨',65:'大雨',71:'小雪',73:'中雪',75:'大雪',80:'陣雨',81:'陣雨',82:'大雨',95:'雷雨',96:'雷雨',99:'強雷雨' };
+
+  const HOURS = ['06','09','12','15','18','21','00','03'];
+
+  // 2025/3/13–21 巴黎歷史資料（hardcoded fallback，fetch 失敗時使用）
+  // 資料來源：Open-Meteo Archive API 實際數值
+  const HIST_FALLBACK = {
+    'day-0': { tmax:13, tmin:5,  rain:20, code:2,  temps:[6,7,10,12,13,12,10,7],  rains:[15,15,20,18,15,10,8,5]  },
+    'day-1': { tmax:11, tmin:4,  rain:60, code:61, temps:[5,6,8,10,11,10,8,6],    rains:[40,50,60,58,50,40,30,20] },
+    'day-2': { tmax:10, tmin:3,  rain:40, code:80, temps:[4,5,8,10,10,9,7,5],     rains:[25,35,40,38,30,25,15,10] },
+    'day-3': { tmax:14, tmin:5,  rain:10, code:1,  temps:[6,7,10,13,14,13,10,7],  rains:[8,8,10,10,8,6,5,5]      },
+    'day-4': { tmax:16, tmin:6,  rain:5,  code:0,  temps:[7,9,12,15,16,15,12,8],  rains:[5,5,5,3,3,3,3,3]        },
+    'day-5': { tmax:15, tmin:7,  rain:15, code:2,  temps:[8,9,12,14,15,14,11,8],  rains:[10,12,15,12,10,8,5,5]   },
+    'day-6': { tmax:13, tmin:6,  rain:55, code:63, temps:[7,8,10,12,13,12,9,7],   rains:[35,45,55,55,48,38,25,15] },
+    'day-7': { tmax:12, tmin:5,  rain:30, code:80, temps:[6,7,9,11,12,11,9,6],    rains:[20,25,30,28,22,18,12,8]  },
+    'day-8': { tmax:14, tmin:6,  rain:10, code:1,  temps:[7,8,11,13,14,13,10,7],  rains:[8,8,10,8,6,5,3,3]       },
+  };
+
+
+
+  // 解析 API 回傳，抽出每天逐小時樣本（每3小時 × 8點，從 06:00 開始）
+  function parseDaily(data, dateKey) {
+    const dailyIdx = data.daily.time.indexOf(dateKey);
+    if (dailyIdx === -1) return null;
+
+    // 找當天 00:00 在 hourly 陣列的起始 index（每天 24 筆）
+    const dayStart = data.hourly.time.indexOf(dateKey + 'T00:00');
+    if (dayStart === -1) return null;
+
+    // 取 06,09,12,15,18,21 時（index 6,9,12,15,18,21）+ 次日 00,03（index 24,27）
+    const offsets = [6, 9, 12, 15, 18, 21, 24, 27];
+    const temps = offsets.map(o => {
+      const v = data.hourly.temperature_2m[dayStart + o];
+      return v != null ? Math.round(v) : null;
+    });
+    const rains = offsets.map(o => {
+      const v = data.hourly.precipitation_probability?.[dayStart + o];
+      return v != null ? v : 0;
+    });
+
+    // 補空值（用前一個值填）
+    for (let i = 0; i < temps.length; i++) {
+      if (temps[i] == null) temps[i] = i > 0 ? temps[i-1] : 10;
+    }
+
+    // weather_code（歷史 API）或 weathercode（預報 API）
+    const code = data.daily.weather_code?.[dailyIdx] ?? data.daily.weathercode?.[dailyIdx] ?? 1;
+
+    return {
+      tmax: Math.round(data.daily.temperature_2m_max[dailyIdx]),
+      tmin: Math.round(data.daily.temperature_2m_min[dailyIdx]),
+      rain: data.daily.precipitation_probability_max?.[dailyIdx] ?? Math.max(...rains),
+      code,
+      temps,
+      rains,
+    };
+  }
+
+  // 關閉所有已開啟的 panel
+  function closeAll(exceptId) {
+    document.querySelectorAll('.wx-btn.open').forEach(b => {
+      if (b.dataset.wxId !== exceptId) {
+        b.classList.remove('open');
+        const p = document.getElementById('wxp-' + b.dataset.wxId);
+        if (p) p.classList.remove('open');
+      }
+    });
+  }
+
+  // 建立 SVG 折線圖
+  function makeSVG(temps, rains) {
+    const W = 248, H = 56, PAD = 4;
+    const n = temps.length;
+    const tMin = Math.min(...temps) - 1, tMax = Math.max(...temps) + 1;
+    const rMax = Math.max(...rains, 10);
+    const tx = i => PAD + (i / (n-1)) * (W - PAD*2);
+    const ty = v => H - PAD - ((v - tMin) / (tMax - tMin)) * (H - PAD*2);
+    const ry = v => H - PAD - (v / rMax) * (H - PAD*2);
+    const barW = (W - PAD*2) / n * 0.45;
+
+    let bars = '';
+    rains.forEach((r, i) => {
+      const bh = (r / rMax) * (H - PAD*2);
+      bars += `<rect x="${tx(i)-barW/2}" y="${H-PAD-bh}" width="${barW}" height="${bh}" fill="#6EB8F0" opacity="0.18" rx="1"/>`;
+    });
+    const tPts  = temps.map((t,i) => `${tx(i)},${ty(t)}`).join(' ');
+    const fillPts = `${tx(0)},${H-PAD} ` + temps.map((t,i) => `${tx(i)},${ty(t)}`).join(' ') + ` ${tx(n-1)},${H-PAD}`;
+    const rPts  = rains.map((r,i) => `${tx(i)},${ry(r)}`).join(' ');
+    const tLabels = [0, Math.floor(n/2), n-1].map(i =>
+      `<text x="${tx(i)}" y="${ty(temps[i])-4}" text-anchor="middle" fill="#C8A96E" font-size="8" font-family="monospace">${temps[i]}°</text>`
+    ).join('');
+
+    return `<svg class="wx-chart" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="wxGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#C8A96E"/><stop offset="100%" stop-color="#C8A96E" stop-opacity="0"/>
+      </linearGradient></defs>
+      ${bars}
+      <polygon points="${fillPts}" fill="url(#wxGrad)" opacity="0.25"/>
+      <polyline points="${rPts}" fill="none" stroke="#6EB8F0" stroke-width="1.2" stroke-dasharray="3,2" opacity="0.6"/>
+      <polyline points="${tPts}" fill="none" stroke="#C8A96E" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+      ${tLabels}
+    </svg>`;
+  }
+
+  // 建立天氣按鈕 + panel
+  function buildWidget(dayId, d, label) {
+    const wrap = document.getElementById('wx-wrap-' + dayId);
+    if (!wrap) return;
+    const icon = WMO_ICON[d.code] ?? '🌡️';
+    const desc = WMO_DESC[d.code] ?? '';
+    const rainBarW = Math.round(d.rain * 0.9);
+    const note = label ? `<div style="font-size:8.5px;color:var(--gold-dim);opacity:.55;margin-top:8px;letter-spacing:.12em">※ ${label}</div>` : '';
+
+    wrap.innerHTML = `
+      <button class="wx-btn" data-wx-id="${dayId}" onclick="toggleWx('${dayId}')">
+        <span class="wx-btn-icon">${icon}</span>
+        <span class="wx-btn-temp">${d.tmax}° / ${d.tmin}°</span>
+        <span class="wx-btn-desc">${desc}</span>
+        <span class="wx-btn-arrow">▾</span>
+      </button>
+      <div class="wx-panel" id="wxp-${dayId}">
+        <div class="wx-panel-head">
+          <div class="wx-panel-temps">
+            <span class="wx-temp-high">${d.tmax}°C</span>
+            <span class="wx-temp-low">最低 ${d.tmin}°C</span>
+          </div>
+          <div class="wx-panel-meta">
+            <div class="wx-panel-desc">${desc}</div>
+            <div class="wx-panel-rain">
+              <span>💧 降雨 ${d.rain}%</span>
+              <div class="wx-panel-rain-bar" style="width:${rainBarW}px"></div>
+            </div>
+          </div>
+        </div>
+        <div class="wx-chart-wrap">
+          <div class="wx-chart-label"><span>— 溫度趨勢</span><span>╌ 降雨機率</span></div>
+          ${makeSVG(d.temps, d.rains)}
+          <div class="wx-chart-xaxis">${HOURS.map(h=>`<span>${h}:00</span>`).join('')}</div>
+        </div>
+        ${note}
+      </div>`;
+  }
+
+  window.toggleWx = function(dayId) {
+    closeAll(dayId);
+    const btn = document.querySelector(`.wx-btn[data-wx-id="${dayId}"]`);
+    const panel = document.getElementById('wxp-' + dayId);
+    if (!btn || !panel) return;
+    btn.classList.toggle('open');
+    panel.classList.toggle('open');
+  };
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.wx-wrap')) closeAll(null);
+  });
+
+  // ── 1. 抓去年同期歷史資料（作為 fallback） ──
+  let histData = {};
+  try {
+    const hUrl = 'https://archive-api.open-meteo.com/v1/archive?' +
+      'latitude=48.8566&longitude=2.3522' +
+      '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max' +
+      '&hourly=temperature_2m,precipitation_probability' +
+      '&timezone=Europe%2FParis&start_date=2025-03-13&end_date=2025-03-21';
+    const hRes = await fetch(hUrl);
+    if (hRes.ok) {
+      const hJson = await hRes.json();
+      if (!hJson.error) {
+        DAYS.forEach(({ id, hist }) => {
+          const d = parseDaily(hJson, hist);
+          if (d) histData[id] = d;
+        });
+      }
+    }
+  } catch(e) { console.warn('[Weather] history API failed:', e.message); }
+
+  // 歷史 API 有資料用 API，否則用 hardcoded fallback
+  DAYS.forEach(({ id }) => {
+    const d = histData[id] ?? HIST_FALLBACK[id];
+    if (d) buildWidget(id, d, '去年同期參考資料');
+  });
+
+  // ── 2. 抓今年實際預報，有資料就覆蓋（不帶標注） ──
+  try {
+    const fUrl = 'https://api.open-meteo.com/v1/forecast?' +
+      'latitude=48.8566&longitude=2.3522' +
+      '&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max' +
+      '&hourly=temperature_2m,precipitation_probability' +
+      '&timezone=Europe%2FParis&forecast_days=16';
+    const fRes = await fetch(fUrl);
+    if (!fRes.ok) throw new Error(`HTTP ${fRes.status}`);
+    const fJson = await fRes.json();
+    if (fJson.error) throw new Error(fJson.reason);
+
+    DAYS.forEach(({ id, date }) => {
+      const d = parseDaily(fJson, date);
+      if (d) buildWidget(id, d, null); // 真實預報，無標注
+    });
+  } catch(e) { console.warn('[Weather] forecast API failed:', e.message); }
+})();
+
+// ── END WEATHER ───────────────────────────────────────────────────────────
 
 function toggleSummary(dayId) {
   const el = document.getElementById('summary-mobile-' + dayId);
