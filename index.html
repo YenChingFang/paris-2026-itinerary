@@ -96,64 +96,6 @@ body {
   font-style: italic; text-align: right;
 }
 
-/* ── MOBILE SUMMARY (摺疊式) ── */
-.summary-mobile {
-  display: none;
-}
-
-@media (max-width: 580px) {
-  /* 隱藏桌機版 summary */
-  .day-summary { display: none; }
-
-  /* 顯示手機版摺疊 summary */
-  .summary-mobile {
-    display: block;
-    margin: 14px 0 0;
-    border: 1px solid #252525;
-    border-left: 3px solid var(--gold-dim);
-    border-radius: 4px;
-    background: #111010;
-    overflow: hidden;
-  }
-  .summary-mobile-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 14px;
-    cursor: pointer;
-    gap: 8px;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .summary-mobile-label {
-    font-size: 10px;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--gold-dim);
-  }
-  .summary-mobile-arrow {
-    font-size: 11px;
-    color: var(--gold-dim);
-    transition: transform .2s;
-    flex-shrink: 0;
-  }
-  .summary-mobile.open .summary-mobile-arrow {
-    transform: rotate(180deg);
-  }
-  .summary-mobile-body {
-    display: none;
-    padding: 0 14px 12px;
-    font-size: 12px;
-    color: var(--muted);
-    line-height: 1.8;
-    font-style: italic;
-    border-top: 1px solid #1E1E1E;
-  }
-  .summary-mobile.open .summary-mobile-body {
-    display: block;
-  }
-}
-
 /* ── HOTEL STRIP ── */
 .hotel-strip {
   display: flex; align-items: center; gap: 12px;
@@ -205,7 +147,31 @@ body {
 .table-wrap::-webkit-scrollbar-track { background: transparent; }
 .table-wrap::-webkit-scrollbar-thumb { background: #2A2A2A; border-radius: 2px; }
 
-/* ── STICKY COLUMNS ── (disabled) ── */
+/* ── STICKY COLUMNS ── */
+/* col 1: 時間/停留 */
+.schedule-table thead th:nth-child(1),
+.schedule-table tbody td:nth-child(1) {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+}
+/* col 2: 地點/活動 */
+.schedule-table thead th:nth-child(2),
+.schedule-table tbody td:nth-child(2) {
+  position: sticky;
+  left: 108px;   /* = col-time width */
+  z-index: 2;
+}
+/* header sticky cells sit above body sticky cells */
+.schedule-table thead th:nth-child(1),
+.schedule-table thead th:nth-child(2) {
+  z-index: 3;
+}
+/* shadow on right edge of sticky cols to hint scrollability */
+.schedule-table tbody td:nth-child(2),
+.schedule-table thead th:nth-child(2) {
+  box-shadow: 4px 0 8px -2px rgba(0,0,0,0.5);
+}
 
 /* 欄寬：sticky固定欄 + 可捲動欄 */
 .col-time  { min-width: 108px; width: 108px; }
@@ -329,9 +295,134 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
   .site-header { padding: 14px 14px 0; }
   .main { padding: 20px 10px 60px; }
   .day-date { font-size: 50px; }
+  .day-summary { display: none; }
   /*備註欄在小螢幕透過橫向捲動查看，不隱藏 */
   td { padding: 10px 8px; }
 }
+
+/* ══ RESTAURANT POPUP ══ */
+.resto-modal-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0.78);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  align-items: center; justify-content: center;
+  padding: 16px;
+}
+.resto-modal-overlay.open { display: flex; animation: mFadeIn .22s ease; }
+@keyframes mFadeIn { from { opacity:0; } to { opacity:1; } }
+
+.resto-modal {
+  background: #141210;
+  border: 1px solid #2E2820;
+  border-top: 2px solid var(--gold);
+  border-radius: 6px;
+  width: 100%; max-width: 560px;
+  max-height: 86vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #2A2A2A transparent;
+  animation: mSlideUp .24s ease;
+  position: relative;
+}
+@keyframes mSlideUp { from { transform:translateY(18px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+
+.resto-modal-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 22px 22px 16px;
+  border-bottom: 1px solid #252525;
+  position: sticky; top: 0;
+  background: #141210; z-index: 2;
+}
+.resto-modal-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px; font-weight: 300;
+  color: var(--gold-lt); letter-spacing: 0.04em;
+  line-height: 1.2;
+}
+.resto-modal-stars {
+  font-size: 11px; color: var(--muted);
+  letter-spacing: 0.15em; text-transform: uppercase;
+  margin-top: 4px;
+}
+.resto-modal-close {
+  background: none; border: none; cursor: pointer;
+  color: var(--dim); font-size: 20px; padding: 2px 6px;
+  line-height: 1; transition: color .15s; flex-shrink: 0;
+  margin-left: 12px;
+}
+.resto-modal-close:hover { color: var(--gold); }
+
+.resto-modal-body { padding: 0 0 20px; }
+
+/* 小統計列 */
+.resto-modal-stats {
+  display: flex; gap: 0;
+  border-bottom: 1px solid #1E1E1E;
+}
+.resto-stat {
+  flex: 1; padding: 12px 16px; text-align: center;
+  border-right: 1px solid #1E1E1E;
+}
+.resto-stat:last-child { border-right: none; }
+.resto-stat-val {
+  font-size: 17px; font-weight: 500; color: var(--gold);
+  letter-spacing: 0.03em; line-height: 1;
+}
+.resto-stat-lbl {
+  font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--muted); margin-top: 4px;
+}
+
+/* 表格 */
+.resto-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 12.5px;
+}
+.resto-table thead th {
+  padding: 9px 14px;
+  font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--gold-dim); font-weight: 500; text-align: left;
+  border-bottom: 1px solid #252525;
+  background: #0F0E0C;
+}
+.resto-table thead th.r { text-align: right; }
+.resto-table tbody td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #1A1A1A;
+  color: var(--text); vertical-align: middle;
+}
+.resto-table tbody td.r { text-align: right; color: var(--muted); }
+.resto-table tbody td.eur { text-align: right; color: var(--gold); }
+.resto-table tbody tr:last-child td { border-bottom: none; }
+.resto-table tbody tr:nth-child(even) td { background: #111010; }
+.resto-item-zh { font-family: 'Cormorant Garamond', serif; font-size: 15px; color: var(--text); }
+.resto-item-fr { font-size: 10.5px; color: var(--dim); margin-top: 2px; font-style: italic; }
+
+/* 小計列 */
+.resto-table tfoot td {
+  padding: 11px 14px;
+  border-top: 2px solid #2E2820;
+  font-size: 11px; letter-spacing: 0.06em;
+}
+.resto-table tfoot .ft-lbl { color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; }
+.resto-table tfoot .ft-eur { text-align: right; color: var(--gold); font-size: 14px; font-weight: 500; }
+.resto-table tfoot .ft-twd { text-align: right; color: var(--text); font-size: 12px; }
+
+/* 點擊提示 badge */
+.menu-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--gold-dim); text-decoration: none;
+  border: 1px solid #3A3020; border-radius: 3px;
+  padding: 2px 8px; margin-left: 9px; cursor: pointer;
+  transition: all .15s; vertical-align: middle; position: relative; top: -1px;
+  background: none;
+}
+.menu-badge:hover { color: var(--gold); border-color: var(--gold-dim); background: rgba(200,169,110,0.08); }
+
 </style>
 </head>
 <body>
@@ -370,13 +461,6 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
         機場搭乘長榮 BR087 直飛巴黎，<br>
         機上把握時間好好補眠。</div>
     </div>
-  </div>
-  <div class="summary-mobile" id="summary-mobile-day-0">
-    <div class="summary-mobile-toggle" onclick="toggleSummary('day-0')">
-      <span class="summary-mobile-label">✦ 今日行程概覽</span>
-      <span class="summary-mobile-arrow">▾</span>
-    </div>
-    <div class="summary-mobile-body">行前休息，維持良好狀態出發。下午健身消耗體力，晚間從桃園機場搭乘長榮 BR087 直飛巴黎，機上把握時間好好補眠。</div>
   </div>
   <div class="hotel-strip">
     <span class="hotel-icon">🏨</span>
@@ -451,13 +535,6 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
         旺多姆廣場珠寶街，夜間赴酒店內<br>
         米其林三星 Plenitude 晚宴。</div>
     </div>
-  </div>
-  <div class="summary-mobile" id="summary-mobile-day-1">
-    <div class="summary-mobile-toggle" onclick="toggleSummary('day-1')">
-      <span class="summary-mobile-label">✦ 今日行程概覽</span>
-      <span class="summary-mobile-arrow">▾</span>
-    </div>
-    <div class="summary-mobile-body">飛抵 CDG，計程車直奔 Cheval Blanc，以水療午睡調整時差，下午輕鬆探索旺多姆廣場珠寶街，夜間赴酒店內米其林三星 Plenitude 晚宴。</div>
   </div>
   <div class="hotel-strip">
     <span class="hotel-icon">🏨</span>
@@ -571,7 +648,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
           <div class="time-end">→ 21:30</div>
           <div class="time-stay">2.5 hr</div>
         </td>
-        <td class="td-place"><span class="place-stars">⭐</span><span class="place-name  star">Plenitude 晚餐</span><a class="map-link" href="https://maps.google.com/?q=Plénitude+Cheval+Blanc+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-place"><span class="place-stars">⭐</span><span class="place-name  star">Plenitude 晚餐</span><button class="menu-badge" onclick="openRestoModal('plenitude')">🍽 菜單</button><a class="map-link" href="https://maps.google.com/?q=Plénitude+Cheval+Blanc+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
         <td class="td-trans"><div class="trans-wrap"><span class="trans-badge hotel">🏨 酒店內</span><span class="trans-time">2 min</span></div></td>
         <td class="td-note">Cheval Blanc 米其林三星</td>
       </tr>
@@ -592,13 +669,6 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
         聖日耳曼左岸新據點，晚間在巷弄<br>
         裡的傳統法式餐廳輕鬆用餐。</div>
     </div>
-  </div>
-  <div class="summary-mobile" id="summary-mobile-day-2">
-    <div class="summary-mobile-toggle" onclick="toggleSummary('day-2')">
-      <span class="summary-mobile-label">✦ 今日行程概覽</span>
-      <span class="summary-mobile-arrow">▾</span>
-    </div>
-    <div class="summary-mobile-body">以 Cheval Blanc 一星早午餐收尾，下午進羅浮宮深度探索。傍晚搬至聖日耳曼左岸新據點，晚間在巷弄裡的傳統法式餐廳輕鬆用餐。</div>
   </div>
   <div class="hotel-strip">
     <span class="hotel-icon">🏨</span>
@@ -662,7 +732,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
           <div class="time-end">→ 21:00</div>
           <div class="time-stay">2 hr</div>
         </td>
-        <td class="td-place"><span class="place-name">Chez Fernand Christine 晚餐</span><a class="map-link" href="https://maps.google.com/?q=Chez+Fernand+Christine+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-place"><span class="place-name">Chez Fernand Christine 晚餐</span><button class="menu-badge" onclick="openRestoModal('fernand')">🍽 菜單</button><a class="map-link" href="https://maps.google.com/?q=Chez+Fernand+Christine+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
         <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">5 min</span></div></td>
         <td class="td-note">傳統法式，口碑佳</td>
       </tr>
@@ -683,13 +753,6 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
         蔬食殿堂 Arpège，下午藥妝・甜點一路掃<br>
         街，傍晚在樂蓬馬歇頂級超市採買野餐晚餐。</div>
     </div>
-  </div>
-  <div class="summary-mobile" id="summary-mobile-day-3">
-    <div class="summary-mobile-toggle" onclick="toggleSummary('day-3')">
-      <span class="summary-mobile-label">✦ 今日行程概覽</span>
-      <span class="summary-mobile-arrow">▾</span>
-    </div>
-    <div class="summary-mobile-body">以塞納河左岸為軸線，從書香咖啡啟程，探訪 Diptyque 創始店，午間赴米其林三星蔬食殿堂 Arpège，下午藥妝・甜點一路掃街，傍晚在樂蓬馬歇頂級超市採買野餐晚餐。</div>
   </div>
   <div class="hotel-strip">
     <span class="hotel-icon">🏨</span>
@@ -753,7 +816,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
           <div class="time-end">→ 14:30</div>
           <div class="time-stay">2.5 hr</div>
         </td>
-        <td class="td-place"><span class="place-stars">⭐</span><span class="place-name  star">Arpège 午餐</span><a class="map-link" href="https://maps.google.com/?q=Restaurant+Arpège+84+Rue+de+Varenne+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-place"><span class="place-stars">⭐</span><span class="place-name  star">Arpège 午餐</span><button class="menu-badge" onclick="openRestoModal('arpege')">🍽 菜單</button><a class="map-link" href="https://maps.google.com/?q=Restaurant+Arpège+84+Rue+de+Varenne+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
         <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">12 min</span></div></td>
         <td class="td-note">蔬食哲學米其林三星，84 Rue de Varenne</td>
       </tr>
@@ -816,13 +879,6 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
         運河野餐，探索瑪麗安東尼農莊花園。<br>
         傍晚返城盛裝赴 Four Seasons 三星晚宴。</div>
     </div>
-  </div>
-  <div class="summary-mobile" id="summary-mobile-day-4">
-    <div class="summary-mobile-toggle" onclick="toggleSummary('day-4')">
-      <span class="summary-mobile-label">✦ 今日行程概覽</span>
-      <span class="summary-mobile-arrow">▾</span>
-    </div>
-    <div class="summary-mobile-body">清晨搭 RER C 出發前往凡爾賽，以 Alain Ducasse 主理的宮殿早餐開場，遊覽鏡廳、運河野餐，探索瑪麗安東尼農莊花園。傍晚返城盛裝赴 Four Seasons 三星晚宴。</div>
   </div>
   <div class="hotel-strip">
     <span class="hotel-icon">🏨</span>
@@ -916,7 +972,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
           <div class="time-end">→ 22:00</div>
           <div class="time-stay">2.5 hr</div>
         </td>
-        <td class="td-place"><span class="place-stars">⭐</span><span class="place-name  star">Le Cinq 晚餐</span><a class="map-link" href="https://maps.google.com/?q=Le+Cinq+Four+Seasons+Hotel+George+V+31+Avenue+George+V+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-place"><span class="place-stars">⭐</span><span class="place-name  star">Le Cinq 晚餐</span><button class="menu-badge" onclick="openRestoModal('lecinq')">🍽 菜單</button><a class="map-link" href="https://maps.google.com/?q=Le+Cinq+Four+Seasons+Hotel+George+V+31+Avenue+George+V+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
         <td class="td-trans"><div class="trans-wrap"><span class="trans-badge taxi">🚖 計程車</span><span class="trans-time">~15 min</span></div></td>
         <td class="td-note">Four Seasons George V，米其林三星</td>
       </tr>
@@ -937,13 +993,6 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
         至歌劇院、拉法葉百貨逛街，晚間就近在<br>
         歌劇院區覓食輕鬆收尾。</div>
     </div>
-  </div>
-  <div class="summary-mobile" id="summary-mobile-day-5">
-    <div class="summary-mobile-toggle" onclick="toggleSummary('day-5')">
-      <span class="summary-mobile-label">✦ 今日行程概覽</span>
-      <span class="summary-mobile-arrow">▾</span>
-    </div>
-    <div class="summary-mobile-body">晨遊布隆尼森林英式花園，在樹蔭深處的 Le Pré Catelan 享用三星午餐。下午穿越至歌劇院、拉法葉百貨逛街，晚間就近在歌劇院區覓食輕鬆收尾。</div>
   </div>
   <div class="hotel-strip">
     <span class="hotel-icon">🏨</span>
@@ -987,7 +1036,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
           <div class="time-end">→ 14:30</div>
           <div class="time-stay">2.5 hr</div>
         </td>
-        <td class="td-place"><span class="place-stars">⭐</span><span class="place-name  star">Le Pré Catelan 午餐</span><a class="map-link" href="https://maps.google.com/?q=Le+Pré+Catelan+Bois+de+Boulogne+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-place"><span class="place-stars">⭐</span><span class="place-name  star">Le Pré Catelan 午餐</span><button class="menu-badge" onclick="openRestoModal('lecatelan')">🍽 菜單</button><a class="map-link" href="https://maps.google.com/?q=Le+Pré+Catelan+Bois+de+Boulogne+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
         <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">5 min</span></div></td>
         <td class="td-note">森林中米其林三星，Le Nôtre 花園旁</td>
       </tr>
@@ -1019,7 +1068,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
           <div class="time-end">→ 20:30</div>
           <div class="time-stay">1.5 hr</div>
         </td>
-        <td class="td-place"><span class="place-name">Spiti Sou 或附近覓食</span><a class="map-link" href="https://maps.google.com/?q=Spiti+Sou+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-place"><span class="place-name">Spiti Sou 或附近覓食</span><button class="menu-badge" onclick="openRestoModal('spitisou')">🍽 菜單</button><a class="map-link" href="https://maps.google.com/?q=Spiti+Sou+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
         <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">~10 min</span></div></td>
         <td class="td-note">歌劇院區輕鬆晚餐</td>
       </tr>
@@ -1040,13 +1089,6 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
         午餐。下午 Merci・Jacques Genin 選物巧克力，<br>
         接著 agnès b.・Le Mont Saint Michel，晚間越南河粉收場。</div>
     </div>
-  </div>
-  <div class="summary-mobile" id="summary-mobile-day-6">
-    <div class="summary-mobile-toggle" onclick="toggleSummary('day-6')">
-      <span class="summary-mobile-label">✦ 今日行程概覽</span>
-      <span class="summary-mobile-arrow">▾</span>
-    </div>
-    <div class="summary-mobile-body">清晨探索巴士底市集，遊覽免費卡納瓦雷博物館，在孚日廣場旁享用三星 L'Ambroisie 午餐。下午 Merci・Jacques Genin 選物巧克力，接著 agnès b.・Le Mont Saint Michel，晚間越南河粉收場。</div>
   </div>
   <div class="hotel-strip">
     <span class="hotel-icon">🏨</span>
@@ -1100,7 +1142,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
           <div class="time-end">→ 15:45</div>
           <div class="time-stay">3.5 hr</div>
         </td>
-        <td class="td-place"><span class="place-stars">⭐</span><span class="place-name  star">L'Ambroisie 午餐</span><a class="map-link" href="https://maps.google.com/?q=L'Ambroisie+9+Place+des+Vosges+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-place"><span class="place-stars">⭐</span><span class="place-name  star">L'Ambroisie 午餐</span><button class="menu-badge" onclick="openRestoModal('ambroisie')">🍽 菜單</button><a class="map-link" href="https://maps.google.com/?q=L'Ambroisie+9+Place+des+Vosges+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
         <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">3 min</span></div></td>
         <td class="td-note">廣場旁米其林三星，9 Place des Vosges</td>
       </tr>
@@ -1134,7 +1176,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
           <div class="time-end">→ 21:30</div>
           <div class="time-stay">1.5 hr</div>
         </td>
-        <td class="td-place"><span class="place-name">Ke Chuan 越南河粉</span><a class="map-link" href="https://maps.google.com/?q=Paris+Vietnamese+restaurant+Marais" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-place"><span class="place-name">Ke Chuan 越南河粉</span><button class="menu-badge" onclick="openRestoModal('kechuan')">🍽 菜單</button><a class="map-link" href="https://maps.google.com/?q=Paris+Vietnamese+restaurant+Marais" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
         <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">~10 min</span></div></td>
         <td class="td-note">換口味，巴黎越南菜口碑選</td>
       </tr>
@@ -1155,13 +1197,6 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
         購物掃貨，黃昏登上凱旋門俯瞰巴黎全景，<br>
         以陶罐燉雞告別晚宴畫下句點。</div>
     </div>
-  </div>
-  <div class="summary-mobile" id="summary-mobile-day-7">
-    <div class="summary-mobile-toggle" onclick="toggleSummary('day-7')">
-      <span class="summary-mobile-label">✦ 今日行程概覽</span>
-      <span class="summary-mobile-arrow">▾</span>
-    </div>
-    <div class="summary-mobile-body">以莫內睡蓮開啟最後一日，杜樂麗漫步後赴日法融合三星 Kei 午餐。下午踏遍香榭麗舍購物掃貨，黃昏登上凱旋門俯瞰巴黎全景，以陶罐燉雞告別晚宴畫下句點。</div>
   </div>
   <div class="hotel-strip">
     <span class="hotel-icon">🏨</span>
@@ -1221,7 +1256,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
           <div class="time-end">→ 15:15</div>
           <div class="time-stay">2.5 hr</div>
         </td>
-        <td class="td-place"><span class="place-stars">⭐</span><span class="place-name  star">Kei 午餐</span><a class="map-link" href="https://maps.google.com/?q=Restaurant+Kei+5+Rue+du+Coq+Héron+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-place"><span class="place-stars">⭐</span><span class="place-name  star">Kei 午餐</span><button class="menu-badge" onclick="openRestoModal('kei')">🍽 菜單</button><a class="map-link" href="https://maps.google.com/?q=Restaurant+Kei+5+Rue+du+Coq+Héron+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
         <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">3 min</span></div></td>
         <td class="td-note">日法融合米其林三星，5 Rue du Coq Héron</td>
       </tr>
@@ -1251,7 +1286,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
           <div class="time-end">→ 21:30</div>
           <div class="time-stay">2 hr</div>
         </td>
-        <td class="td-place"><span class="place-name">Restaurant Le 703 晚餐</span><a class="map-link" href="https://maps.google.com/?q=Restaurant+Le+703+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-place"><span class="place-name">Restaurant Le 703 晚餐</span><button class="menu-badge" onclick="openRestoModal('le703')">🍽 菜單</button><a class="map-link" href="https://maps.google.com/?q=Restaurant+Le+703+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
         <td class="td-trans"><div class="trans-wrap"><span class="trans-badge taxi">🚖 計程車</span><span class="trans-time">~15 min</span></div></td>
         <td class="td-note">陶罐燉雞＋阿爾薩斯氣泡酒，溫馨告別晚宴</td>
       </tr>
@@ -1272,13 +1307,6 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
         BR088 直飛桃園，結束這趟<br>
         充滿美食與藝術的巴黎之旅。</div>
     </div>
-  </div>
-  <div class="summary-mobile" id="summary-mobile-day-8">
-    <div class="summary-mobile-toggle" onclick="toggleSummary('day-8')">
-      <span class="summary-mobile-label">✦ 今日行程概覽</span>
-      <span class="summary-mobile-arrow">▾</span>
-    </div>
-    <div class="summary-mobile-body">清晨計程車前往 CDG，完成退稅後在免稅區輕鬆候機。搭乘長榮 BR088 直飛桃園，結束這趟充滿美食與藝術的巴黎之旅。</div>
   </div>
   <div class="hotel-strip">
     <span class="hotel-icon">🏨</span>
@@ -1339,13 +1367,202 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
     </tbody>
   </table></div>
 </section>
+
+<!-- ══ RESTAURANT MODAL ══ -->
+<div class="resto-modal-overlay" id="restoModalOverlay" onclick="closeRestoModal(event)">
+  <div class="resto-modal" id="restoModal">
+    <div class="resto-modal-head">
+      <div>
+        <div class="resto-modal-title" id="restoModalTitle"></div>
+        <div class="resto-modal-stars" id="restoModalStars"></div>
+      </div>
+      <button class="resto-modal-close" onclick="closeRestoModal(null)">✕</button>
+    </div>
+    <div class="resto-modal-body">
+      <div class="resto-modal-stats" id="restoModalStats"></div>
+      <table class="resto-table">
+        <thead><tr>
+          <th>菜色</th>
+          <th class="r" style="white-space:nowrap">單價 EUR</th>
+          <th class="r">數量</th>
+          <th class="r" style="white-space:nowrap">總計 EUR</th>
+          <th class="r" style="white-space:nowrap">總計 TWD</th>
+        </tr></thead>
+        <tbody id="restoModalItems"></tbody>
+        <tfoot id="restoModalFoot"></tfoot>
+      </table>
+    </div>
+  </div>
+</div>
+
 </main>
 
 <script>
-function toggleSummary(dayId) {
-  const el = document.getElementById('summary-mobile-' + dayId);
-  if (el) el.classList.toggle('open');
+
+const RESTAURANT_DATA = {
+  plenitude: {
+    name: "Plénitude",
+    stars: "★★★ Cheval Blanc Paris",
+    items: [
+      { zh: "Symphony 套餐", fr: "Menu Symphony", price: 495, qty: 4 }
+    ]
+  },
+  arpege: {
+    name: "Arpège",
+    stars: "★★★ 米其林三星 · 蔬食殿堂",
+    items: [
+      { zh: "午餐素食套餐", fr: "Le Déjeuner Potager", price: 260, qty: 4 }
+    ]
+  },
+  ambroisie: {
+    name: "L'Ambroisie",
+    stars: "★★★ 孚日廣場",
+    items: [
+      { zh: "螯蝦千層酥", fr: "Feuillantine de langoustines", price: 145, qty: 2 },
+      { zh: "松露派", fr: "Tarte fine aux truffes", price: 300, qty: 1 },
+      { zh: "龍蝦", fr: "Homard", price: 140, qty: 1 },
+      { zh: "布列斯雞", fr: "Poulet de Bresse", price: 380, qty: 1 },
+      { zh: "乳羊", fr: "Agneau de lait", price: 160, qty: 1 },
+      { zh: "巧克力派", fr: "Tarte au chocolat", price: 48, qty: 2 },
+      { zh: "香草冰淇淋", fr: "Glace à la vanille", price: 48, qty: 2 }
+    ]
+  },
+  lecatelan: {
+    name: "Le Pré Catelan",
+    stars: "★★★ 布隆尼森林",
+    items: [
+      { zh: "午餐套餐", fr: "Menu Déjeuner", price: 195, qty: 4 }
+    ]
+  },
+  kei: {
+    name: "Restaurant Kei",
+    stars: "★★★ 日法融合",
+    items: [
+      { zh: "午餐套餐", fr: "Menu Déjeuner", price: 185, qty: 4 }
+    ]
+  },
+  lecinq: {
+    name: "Le Cinq",
+    stars: "★★★ Four Seasons George V",
+    items: [
+      { zh: "螯蝦", fr: "Langoustines", price: 185, qty: 2 },
+      { zh: "洋蔥", fr: "Oignon", price: 120, qty: 2 },
+      { zh: "義大利麵", fr: "Spaghetti", price: 210, qty: 2 },
+      { zh: "羊", fr: "Agneau", price: 175, qty: 2 },
+      { zh: "甜點", fr: "Desserts", price: 52, qty: 4 }
+    ]
+  },
+  fernand: {
+    name: "Chez Fernand",
+    stars: "傳統法式小館",
+    items: [
+      { zh: "洋蔥湯", fr: "Soupe à l'oignon", price: 14.5, qty: 1 },
+      { zh: "蝸牛", fr: "Escargots (6pcs)", price: 16.5, qty: 1 },
+      { zh: "牛肝菌餃", fr: "Ravioles aux cèpes", price: 26.5, qty: 1 },
+      { zh: "紅酒燉牛肉", fr: "Boeuf Bourguignon", price: 36.5, qty: 1 }
+    ]
+  },
+  kechuan: {
+    name: "Ke Chuan",
+    stars: "越南料理",
+    items: [
+      { zh: "春捲", fr: "Nems", price: 6, qty: 2 },
+      { zh: "Pho (越南河粉)", fr: "Pho", price: 13, qty: 4 }
+    ]
+  },
+  le703: {
+    name: "Restaurant Le 703",
+    stars: "阿爾薩斯風味餐廳",
+    items: [
+      { zh: "肉派", fr: "Pâté en croûte", price: 15, qty: 1 },
+      { zh: "燜雞", fr: "Poulet Braisé", price: 78, qty: 1 },
+      { zh: "牛臀", fr: "Culotte de bœuf", price: 28, qty: 1 },
+      { zh: "法式吐司", fr: "Pain perdu", price: 14, qty: 1 },
+      { zh: "氣泡酒", fr: "Crémant d'Alsace", price: 64, qty: 1 }
+    ]
+  },
+  spitisou: {
+    name: "Spiti Sou",
+    stars: "希臘料理",
+    items: [
+      { zh: "前菜三重奏", fr: "Trio de mezzés", price: 21, qty: 1 },
+      { zh: "炸肉丸", fr: "Kotopoulo", price: 19, qty: 1 },
+      { zh: "烤羊排", fr: "Paidakia", price: 70, qty: 1 },
+      { zh: "燉肉米麵", fr: "Giouvetsi", price: 38, qty: 1 }
+    ]
+  }
+};
+
+const RATE = 37;
+
+function openRestoModal(key) {
+  const d = RESTAURANT_DATA[key];
+  if (!d) return;
+  document.getElementById('restoModalTitle').textContent = d.name;
+  document.getElementById('restoModalStars').textContent = d.stars;
+
+  let totalEUR = 0;
+  let totalTWD = 0;
+  let rows = '';
+  d.items.forEach(it => {
+    const lineEUR = Math.round(it.price * it.qty);
+    const lineTWD = Math.round(lineEUR * RATE);
+    totalEUR += lineEUR;
+    totalTWD += lineTWD;
+    rows += `<tr>
+      <td>
+        <div class="resto-item-zh">${it.zh}</div>
+        <div class="resto-item-fr">${it.fr}</div>
+      </td>
+      <td class="r eur">${it.price.toLocaleString()}</td>
+      <td class="r">${it.qty}</td>
+      <td class="r eur">${lineEUR.toLocaleString()}</td>
+      <td class="r">${lineTWD.toLocaleString()}</td>
+    </tr>`;
+  });
+  document.getElementById('restoModalItems').innerHTML = rows;
+
+  // stats
+  const itemCount = d.items.reduce((a,b) => a + b.qty, 0);
+  document.getElementById('restoModalStats').innerHTML = `
+    <div class="resto-stat">
+      <div class="resto-stat-val">${d.items.length}</div>
+      <div class="resto-stat-lbl">菜色項目</div>
+    </div>
+    <div class="resto-stat">
+      <div class="resto-stat-val">${itemCount}</div>
+      <div class="resto-stat-lbl">點餐份數</div>
+    </div>
+    <div class="resto-stat">
+      <div class="resto-stat-val">€${totalEUR.toLocaleString()}</div>
+      <div class="resto-stat-lbl">總計 EUR</div>
+    </div>
+    <div class="resto-stat">
+      <div class="resto-stat-val">$${totalTWD.toLocaleString()}</div>
+      <div class="resto-stat-lbl">總計 TWD</div>
+    </div>
+  `;
+
+  // footer
+  document.getElementById('restoModalFoot').innerHTML = `
+    <tr>
+      <td class="ft-lbl" colspan="3">合計（匯率 1 EUR : ${RATE} TWD）</td>
+      <td class="ft-eur">€ ${totalEUR.toLocaleString()}</td>
+      <td class="ft-twd">NT$ ${totalTWD.toLocaleString()}</td>
+    </tr>
+  `;
+
+  document.getElementById('restoModalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
+
+function closeRestoModal(e) {
+  if (e && e.target !== document.getElementById('restoModalOverlay')) return;
+  document.getElementById('restoModalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRestoModal(null); });
 
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
