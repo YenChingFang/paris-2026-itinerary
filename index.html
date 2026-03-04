@@ -404,6 +404,16 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
   .wx-panel { position: fixed; left: 14px; right: 14px; min-width: unset; }
 }
 
+/* 資料來源標注 */
+.wx-source {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #222;
+  font-size: 9px; letter-spacing: 0.14em;
+}
+.wx-source--live { color: #5DBE8A; }
+.wx-source--hist { color: var(--gold-dim); }
+
 /* ── DAY VIEW ── */
 .day-view { display: none; }
 .day-view.active { display: block; animation: fadeUp .28s ease; }
@@ -1598,221 +1608,216 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
 <script>
 
 // ── WEATHER ──────────────────────────────────────────────────────────────
-(async function loadWeather() {
-  const DAYS = [
-    { id: 'day-0', date: '2026-03-13', hist: '2025-03-13' },
-    { id: 'day-1', date: '2026-03-14', hist: '2025-03-14' },
-    { id: 'day-2', date: '2026-03-15', hist: '2025-03-15' },
-    { id: 'day-3', date: '2026-03-16', hist: '2025-03-16' },
-    { id: 'day-4', date: '2026-03-17', hist: '2025-03-17' },
-    { id: 'day-5', date: '2026-03-18', hist: '2025-03-18' },
-    { id: 'day-6', date: '2026-03-19', hist: '2025-03-19' },
-    { id: 'day-7', date: '2026-03-20', hist: '2025-03-20' },
-    { id: 'day-8', date: '2026-03-21', hist: '2025-03-21' },
+(function() {
+  var DAYS = [
+    { id:'day-0', date:'2026-03-13', hist:'2025-03-13' },
+    { id:'day-1', date:'2026-03-14', hist:'2025-03-14' },
+    { id:'day-2', date:'2026-03-15', hist:'2025-03-15' },
+    { id:'day-3', date:'2026-03-16', hist:'2025-03-16' },
+    { id:'day-4', date:'2026-03-17', hist:'2025-03-17' },
+    { id:'day-5', date:'2026-03-18', hist:'2025-03-18' },
+    { id:'day-6', date:'2026-03-19', hist:'2025-03-19' },
+    { id:'day-7', date:'2026-03-20', hist:'2025-03-20' },
+    { id:'day-8', date:'2026-03-21', hist:'2025-03-21' },
   ];
-
-  const WMO_ICON = { 0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',71:'🌨️',73:'🌨️',75:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',95:'⛈️',96:'⛈️',99:'⛈️' };
-  const WMO_DESC = { 0:'晴',1:'多雲間晴',2:'局部多雲',3:'陰天',45:'霧',48:'霧',51:'毛毛雨',53:'毛毛雨',55:'細雨',61:'小雨',63:'中雨',65:'大雨',71:'小雪',73:'中雪',75:'大雪',80:'陣雨',81:'陣雨',82:'大雨',95:'雷雨',96:'雷雨',99:'強雷雨' };
-
-  const HOURS = ['06','09','12','15','18','21','00','03'];
-
-  // 2025/3/13–21 巴黎歷史資料（hardcoded fallback，fetch 失敗時使用）
-  // 資料來源：Open-Meteo Archive API 實際數值
-  const HIST_FALLBACK = {
-    'day-0': { tmax:13, tmin:5,  rain:20, code:2,  temps:[6,7,10,12,13,12,10,7],  rains:[15,15,20,18,15,10,8,5]  },
-    'day-1': { tmax:11, tmin:4,  rain:60, code:61, temps:[5,6,8,10,11,10,8,6],    rains:[40,50,60,58,50,40,30,20] },
-    'day-2': { tmax:10, tmin:3,  rain:40, code:80, temps:[4,5,8,10,10,9,7,5],     rains:[25,35,40,38,30,25,15,10] },
-    'day-3': { tmax:14, tmin:5,  rain:10, code:1,  temps:[6,7,10,13,14,13,10,7],  rains:[8,8,10,10,8,6,5,5]      },
-    'day-4': { tmax:16, tmin:6,  rain:5,  code:0,  temps:[7,9,12,15,16,15,12,8],  rains:[5,5,5,3,3,3,3,3]        },
-    'day-5': { tmax:15, tmin:7,  rain:15, code:2,  temps:[8,9,12,14,15,14,11,8],  rains:[10,12,15,12,10,8,5,5]   },
-    'day-6': { tmax:13, tmin:6,  rain:55, code:63, temps:[7,8,10,12,13,12,9,7],   rains:[35,45,55,55,48,38,25,15] },
-    'day-7': { tmax:12, tmin:5,  rain:30, code:80, temps:[6,7,9,11,12,11,9,6],    rains:[20,25,30,28,22,18,12,8]  },
-    'day-8': { tmax:14, tmin:6,  rain:10, code:1,  temps:[7,8,11,13,14,13,10,7],  rains:[8,8,10,8,6,5,3,3]       },
+  var HOURS = ['06','09','12','15','18','21','00','03'];
+  var WMO_ICON = {0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',71:'🌨️',73:'🌨️',75:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',95:'⛈️',96:'⛈️',99:'⛈️'};
+  var WMO_DESC = {0:'晴',1:'多雲間晴',2:'局部多雲',3:'陰天',45:'霧',48:'霧',51:'毛毛雨',53:'毛毛雨',55:'細雨',61:'小雨',63:'中雨',65:'大雨',71:'小雪',73:'中雪',75:'大雪',80:'陣雨',81:'陣雨',82:'大雨',95:'雷雨',96:'雷雨',99:'強雷雨'};
+  var HIST_FALLBACK = {
+    'day-0':{ tmax:13, tmin:5,  rain:20, code:2,  temps:[6,7,10,12,13,12,10,7],  rains:[15,15,20,18,15,10,8,5]  },
+    'day-1':{ tmax:11, tmin:4,  rain:60, code:61, temps:[5,6,8,10,11,10,8,6],    rains:[40,50,60,58,50,40,30,20] },
+    'day-2':{ tmax:10, tmin:3,  rain:40, code:80, temps:[4,5,8,10,10,9,7,5],     rains:[25,35,40,38,30,25,15,10] },
+    'day-3':{ tmax:14, tmin:5,  rain:10, code:1,  temps:[6,7,10,13,14,13,10,7],  rains:[8,8,10,10,8,6,5,5]      },
+    'day-4':{ tmax:16, tmin:6,  rain:5,  code:0,  temps:[7,9,12,15,16,15,12,8],  rains:[5,5,5,3,3,3,3,3]        },
+    'day-5':{ tmax:15, tmin:7,  rain:15, code:2,  temps:[8,9,12,14,15,14,11,8],  rains:[10,12,15,12,10,8,5,5]   },
+    'day-6':{ tmax:13, tmin:6,  rain:55, code:63, temps:[7,8,10,12,13,12,9,7],   rains:[35,45,55,55,48,38,25,15] },
+    'day-7':{ tmax:12, tmin:5,  rain:30, code:80, temps:[6,7,9,11,12,11,9,6],    rains:[20,25,30,28,22,18,12,8]  },
+    'day-8':{ tmax:14, tmin:6,  rain:10, code:1,  temps:[7,8,11,13,14,13,10,7],  rains:[8,8,10,8,6,5,3,3]       },
   };
 
-
-
-  // 解析 API 回傳，抽出每天逐小時樣本（每3小時 × 8點，從 06:00 開始）
   function parseDaily(data, dateKey) {
-    const dailyIdx = data.daily.time.indexOf(dateKey);
-    if (dailyIdx === -1) return null;
-
-    // 找當天 00:00 在 hourly 陣列的起始 index（每天 24 筆）
-    const dayStart = data.hourly.time.indexOf(dateKey + 'T00:00');
-    if (dayStart === -1) return null;
-
-    // 取 06,09,12,15,18,21 時（index 6,9,12,15,18,21）+ 次日 00,03（index 24,27）
-    const offsets = [6, 9, 12, 15, 18, 21, 24, 27];
-    const temps = offsets.map(o => {
-      const v = data.hourly.temperature_2m[dayStart + o];
-      return v != null ? Math.round(v) : null;
+    var di = data.daily.time.indexOf(dateKey);
+    if (di === -1) return null;
+    var ds = data.hourly.time.indexOf(dateKey + 'T00:00');
+    if (ds === -1) return null;
+    var offsets = [6,9,12,15,18,21,24,27];
+    var temps = offsets.map(function(o) {
+      var v = data.hourly.temperature_2m[ds+o];
+      return (v != null) ? Math.round(v) : null;
     });
-    const rains = offsets.map(o => {
-      const v = data.hourly.precipitation_probability?.[dayStart + o];
-      return v != null ? v : 0;
+    var rains = offsets.map(function(o) {
+      var v = data.hourly.precipitation_probability ? data.hourly.precipitation_probability[ds+o] : null;
+      return (v != null) ? v : 0;
     });
-
-    // 補空值（用前一個值填）
-    for (let i = 0; i < temps.length; i++) {
+    for (var i=0; i<temps.length; i++) {
       if (temps[i] == null) temps[i] = i > 0 ? temps[i-1] : 10;
     }
-
-    // weather_code（歷史 API）或 weathercode（預報 API）
-    const code = data.daily.weather_code?.[dailyIdx] ?? data.daily.weathercode?.[dailyIdx] ?? 1;
-
+    var code = (data.daily.weather_code && data.daily.weather_code[di] != null)
+      ? data.daily.weather_code[di]
+      : (data.daily.weathercode ? data.daily.weathercode[di] : 1);
+    var rainMax = data.daily.precipitation_probability_max
+      ? data.daily.precipitation_probability_max[di]
+      : Math.max.apply(null, rains);
     return {
-      tmax: Math.round(data.daily.temperature_2m_max[dailyIdx]),
-      tmin: Math.round(data.daily.temperature_2m_min[dailyIdx]),
-      rain: data.daily.precipitation_probability_max?.[dailyIdx] ?? Math.max(...rains),
-      code,
-      temps,
-      rains,
+      tmax: Math.round(data.daily.temperature_2m_max[di]),
+      tmin: Math.round(data.daily.temperature_2m_min[di]),
+      rain: rainMax || 0,
+      code: code,
+      temps: temps,
+      rains: rains,
     };
   }
 
-  // 關閉所有已開啟的 panel
+  function makeSVG(temps, rains) {
+    var W=248, H=56, PAD=4, n=temps.length;
+    if (n < 2) return '';
+    var tMin=Math.min.apply(null,temps)-1, tMax=Math.max.apply(null,temps)+1;
+    var tRange = tMax-tMin || 1;
+    var rMax = Math.max.apply(null,rains.concat([10]));
+    function tx(i){ return PAD + (i/(n-1))*(W-PAD*2); }
+    function ty(v){ return H-PAD - ((v-tMin)/tRange)*(H-PAD*2); }
+    function ry(v){ return H-PAD - (v/rMax)*(H-PAD*2); }
+    var barW = (W-PAD*2)/n*0.45;
+    var bars='';
+    for (var i=0; i<rains.length; i++) {
+      var bh=(rains[i]/rMax)*(H-PAD*2);
+      bars += '<rect x="'+(tx(i)-barW/2)+'" y="'+(H-PAD-bh)+'" width="'+barW+'" height="'+bh+'" fill="#6EB8F0" opacity="0.18" rx="1"/>';
+    }
+    var tPts='', fillPts=tx(0)+','+(H-PAD)+' ', rPts='';
+    for (var i=0; i<n; i++) {
+      tPts += tx(i)+','+ty(temps[i])+(i<n-1?' ':'');
+      fillPts += tx(i)+','+ty(temps[i])+' ';
+      rPts += tx(i)+','+ry(rains[i])+(i<n-1?' ':'');
+    }
+    fillPts += tx(n-1)+','+(H-PAD);
+    var labelIdxs=[0, Math.floor(n/2), n-1], labels='';
+    for (var k=0; k<labelIdxs.length; k++) {
+      var li=labelIdxs[k];
+      labels += '<text x="'+tx(li)+'" y="'+(ty(temps[li])-4)+'" text-anchor="middle" fill="#C8A96E" font-size="8" font-family="monospace">'+temps[li]+'°</text>';
+    }
+    return '<svg class="wx-chart" viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">'
+      +'<defs><linearGradient id="wxGrad" x1="0" y1="0" x2="0" y2="1">'
+      +'<stop offset="0%" stop-color="#C8A96E"/><stop offset="100%" stop-color="#C8A96E" stop-opacity="0"/>'
+      +'</linearGradient></defs>'
+      +bars
+      +'<polygon points="'+fillPts+'" fill="url(#wxGrad)" opacity="0.25"/>'
+      +'<polyline points="'+rPts+'" fill="none" stroke="#6EB8F0" stroke-width="1.2" stroke-dasharray="3,2" opacity="0.6"/>'
+      +'<polyline points="'+tPts+'" fill="none" stroke="#C8A96E" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>'
+      +labels+'</svg>';
+  }
+
   function closeAll(exceptId) {
-    document.querySelectorAll('.wx-btn.open').forEach(b => {
-      if (b.dataset.wxId !== exceptId) {
-        b.classList.remove('open');
-        const p = document.getElementById('wxp-' + b.dataset.wxId);
+    var btns = document.querySelectorAll('.wx-btn.open');
+    for (var i=0; i<btns.length; i++) {
+      if (btns[i].dataset.wxId !== exceptId) {
+        btns[i].classList.remove('open');
+        var p = document.getElementById('wxp-'+btns[i].dataset.wxId);
         if (p) p.classList.remove('open');
       }
-    });
+    }
   }
 
-  // 建立 SVG 折線圖
-  function makeSVG(temps, rains) {
-    const W = 248, H = 56, PAD = 4;
-    const n = temps.length;
-    const tMin = Math.min(...temps) - 1, tMax = Math.max(...temps) + 1;
-    const rMax = Math.max(...rains, 10);
-    const tx = i => PAD + (i / (n-1)) * (W - PAD*2);
-    const ty = v => H - PAD - ((v - tMin) / (tMax - tMin)) * (H - PAD*2);
-    const ry = v => H - PAD - (v / rMax) * (H - PAD*2);
-    const barW = (W - PAD*2) / n * 0.45;
-
-    let bars = '';
-    rains.forEach((r, i) => {
-      const bh = (r / rMax) * (H - PAD*2);
-      bars += `<rect x="${tx(i)-barW/2}" y="${H-PAD-bh}" width="${barW}" height="${bh}" fill="#6EB8F0" opacity="0.18" rx="1"/>`;
-    });
-    const tPts  = temps.map((t,i) => `${tx(i)},${ty(t)}`).join(' ');
-    const fillPts = `${tx(0)},${H-PAD} ` + temps.map((t,i) => `${tx(i)},${ty(t)}`).join(' ') + ` ${tx(n-1)},${H-PAD}`;
-    const rPts  = rains.map((r,i) => `${tx(i)},${ry(r)}`).join(' ');
-    const tLabels = [0, Math.floor(n/2), n-1].map(i =>
-      `<text x="${tx(i)}" y="${ty(temps[i])-4}" text-anchor="middle" fill="#C8A96E" font-size="8" font-family="monospace">${temps[i]}°</text>`
-    ).join('');
-
-    return `<svg class="wx-chart" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="wxGrad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#C8A96E"/><stop offset="100%" stop-color="#C8A96E" stop-opacity="0"/>
-      </linearGradient></defs>
-      ${bars}
-      <polygon points="${fillPts}" fill="url(#wxGrad)" opacity="0.25"/>
-      <polyline points="${rPts}" fill="none" stroke="#6EB8F0" stroke-width="1.2" stroke-dasharray="3,2" opacity="0.6"/>
-      <polyline points="${tPts}" fill="none" stroke="#C8A96E" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
-      ${tLabels}
-    </svg>`;
-  }
-
-  // 建立天氣按鈕 + panel
   function buildWidget(dayId, d, label) {
-    const wrap = document.getElementById('wx-wrap-' + dayId);
+    var wrap = document.getElementById('wx-wrap-'+dayId);
     if (!wrap) return;
-    const icon = WMO_ICON[d.code] ?? '🌡️';
-    const desc = WMO_DESC[d.code] ?? '';
-    const rainBarW = Math.round(d.rain * 0.9);
-    const note = label ? `<div style="font-size:8.5px;color:var(--gold-dim);opacity:.55;margin-top:8px;letter-spacing:.12em">※ ${label}</div>` : '';
+    var icon = WMO_ICON[d.code] || '🌡️';
+    var desc = WMO_DESC[d.code] || '';
+    var rainBarW = Math.round(d.rain * 0.9);
+    var sourceHTML = label
+      ? '<div class="wx-source wx-source--hist">📅 ' + label + '</div>'
+      : '<div class="wx-source wx-source--live">📡 即時預報資料</div>';
+    var xaxis = '';
+    for (var i=0; i<HOURS.length; i++) xaxis += '<span>'+HOURS[i]+':00</span>';
 
-    wrap.innerHTML = `
-      <button class="wx-btn" data-wx-id="${dayId}" onclick="toggleWx('${dayId}')">
-        <span class="wx-btn-icon">${icon}</span>
-        <span class="wx-btn-temp">${d.tmax}° / ${d.tmin}°</span>
-        <span class="wx-btn-desc">${desc}</span>
-        <span class="wx-btn-arrow">▾</span>
-      </button>
-      <div class="wx-panel" id="wxp-${dayId}">
-        <div class="wx-panel-head">
-          <div class="wx-panel-temps">
-            <span class="wx-temp-high">${d.tmax}°C</span>
-            <span class="wx-temp-low">最低 ${d.tmin}°C</span>
-          </div>
-          <div class="wx-panel-meta">
-            <div class="wx-panel-desc">${desc}</div>
-            <div class="wx-panel-rain">
-              <span>💧 降雨 ${d.rain}%</span>
-              <div class="wx-panel-rain-bar" style="width:${rainBarW}px"></div>
-            </div>
-          </div>
-        </div>
-        <div class="wx-chart-wrap">
-          <div class="wx-chart-label"><span>— 溫度趨勢</span><span>╌ 降雨機率</span></div>
-          ${makeSVG(d.temps, d.rains)}
-          <div class="wx-chart-xaxis">${HOURS.map(h=>`<span>${h}:00</span>`).join('')}</div>
-        </div>
-        ${note}
-      </div>`;
+    var html = '';
+    html += '<button class="wx-btn" data-wx-id="'+dayId+'" onclick="toggleWx(\''+dayId+'\')">';
+    html += '<span class="wx-btn-icon">'+icon+'</span>';
+    html += '<span class="wx-btn-temp">'+d.tmax+'° / '+d.tmin+'°</span>';
+    html += '<span class="wx-btn-desc">'+desc+'</span>';
+    html += '<span class="wx-btn-arrow">▾</span>';
+    html += '</button>';
+    html += '<div class="wx-panel" id="wxp-'+dayId+'">';
+    html += '<div class="wx-panel-head">';
+    html += '<div class="wx-panel-temps">';
+    html += '<span class="wx-temp-high">'+d.tmax+'°C</span>';
+    html += '<span class="wx-temp-low">最低 '+d.tmin+'°C</span>';
+    html += '</div>';
+    html += '<div class="wx-panel-meta">';
+    html += '<div class="wx-panel-desc">'+desc+'</div>';
+    html += '<div class="wx-panel-rain"><span>💧 降雨 '+d.rain+'%</span>';
+    html += '<div class="wx-panel-rain-bar" style="width:'+rainBarW+'px"></div></div>';
+    html += '</div></div>';
+    html += '<div class="wx-chart-wrap">';
+    html += '<div class="wx-chart-label"><span>— 溫度趨勢</span><span>╌ 降雨機率</span></div>';
+    html += makeSVG(d.temps, d.rains);
+    html += '<div class="wx-chart-xaxis">'+xaxis+'</div>';
+    html += '</div>';
+    html += sourceHTML;
+    html += '</div>';
+    wrap.innerHTML = html;
   }
 
   window.toggleWx = function(dayId) {
     closeAll(dayId);
-    const btn = document.querySelector(`.wx-btn[data-wx-id="${dayId}"]`);
-    const panel = document.getElementById('wxp-' + dayId);
+    var btn = document.querySelector('.wx-btn[data-wx-id="'+dayId+'"]');
+    var panel = document.getElementById('wxp-'+dayId);
     if (!btn || !panel) return;
     btn.classList.toggle('open');
     panel.classList.toggle('open');
   };
 
-  document.addEventListener('click', e => {
+  document.addEventListener('click', function(e) {
     if (!e.target.closest('.wx-wrap')) closeAll(null);
   });
 
-  // ── 1. 抓去年同期歷史資料（作為 fallback） ──
-  let histData = {};
-  try {
-    const hUrl = 'https://archive-api.open-meteo.com/v1/archive?' +
-      'latitude=48.8566&longitude=2.3522' +
-      '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max' +
-      '&hourly=temperature_2m,precipitation_probability' +
-      '&timezone=Europe%2FParis&start_date=2025-03-13&end_date=2025-03-21';
-    const hRes = await fetch(hUrl);
-    if (hRes.ok) {
-      const hJson = await hRes.json();
-      if (!hJson.error) {
-        DAYS.forEach(({ id, hist }) => {
-          const d = parseDaily(hJson, hist);
-          if (d) histData[id] = d;
-        });
+  function applyData(data, dateKey, dayId, label) {
+    var d = parseDaily(data, dateKey);
+    if (d) { buildWidget(dayId, d, label); return true; }
+    return false;
+  }
+
+  // 先用 hardcoded fallback 渲染
+  for (var i=0; i<DAYS.length; i++) {
+    var day = DAYS[i];
+    var fb = HIST_FALLBACK[day.id];
+    if (fb) buildWidget(day.id, fb, '去年同期參考資料');
+  }
+
+  // 非同步更新：歷史 API → 預報 API
+  (async function() {
+    try {
+      var hUrl = 'https://archive-api.open-meteo.com/v1/archive?latitude=48.8566&longitude=2.3522'
+        +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max'
+        +'&hourly=temperature_2m,precipitation_probability'
+        +'&timezone=Europe%2FParis&start_date=2025-03-13&end_date=2025-03-21';
+      var hr = await fetch(hUrl);
+      if (hr.ok) {
+        var hj = await hr.json();
+        if (!hj.error) {
+          for (var i=0; i<DAYS.length; i++) {
+            applyData(hj, DAYS[i].hist, DAYS[i].id, '去年同期參考資料');
+          }
+        }
       }
-    }
-  } catch(e) { console.warn('[Weather] history API failed:', e.message); }
+    } catch(e) { /* 靜默，已有 fallback */ }
 
-  // 歷史 API 有資料用 API，否則用 hardcoded fallback
-  DAYS.forEach(({ id }) => {
-    const d = histData[id] ?? HIST_FALLBACK[id];
-    if (d) buildWidget(id, d, '去年同期參考資料');
-  });
-
-  // ── 2. 抓今年實際預報，有資料就覆蓋（不帶標注） ──
-  try {
-    const fUrl = 'https://api.open-meteo.com/v1/forecast?' +
-      'latitude=48.8566&longitude=2.3522' +
-      '&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max' +
-      '&hourly=temperature_2m,precipitation_probability' +
-      '&timezone=Europe%2FParis&forecast_days=16';
-    const fRes = await fetch(fUrl);
-    if (!fRes.ok) throw new Error(`HTTP ${fRes.status}`);
-    const fJson = await fRes.json();
-    if (fJson.error) throw new Error(fJson.reason);
-
-    DAYS.forEach(({ id, date }) => {
-      const d = parseDaily(fJson, date);
-      if (d) buildWidget(id, d, null); // 真實預報，無標注
-    });
-  } catch(e) { console.warn('[Weather] forecast API failed:', e.message); }
+    try {
+      var fUrl = 'https://api.open-meteo.com/v1/forecast?latitude=48.8566&longitude=2.3522'
+        +'&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max'
+        +'&hourly=temperature_2m,precipitation_probability'
+        +'&timezone=Europe%2FParis&forecast_days=16';
+      var fr = await fetch(fUrl);
+      if (fr.ok) {
+        var fj = await fr.json();
+        if (!fj.error) {
+          for (var i=0; i<DAYS.length; i++) {
+            applyData(fj, DAYS[i].date, DAYS[i].id, null);
+          }
+        }
+      }
+    } catch(e) { /* 靜默 */ }
+  })();
 })();
-
 // ── END WEATHER ───────────────────────────────────────────────────────────
 
 function toggleSummary(dayId) {
