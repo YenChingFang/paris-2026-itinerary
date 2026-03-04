@@ -96,6 +96,56 @@ body {
   font-style: italic; text-align: right;
 }
 
+/* ── MOBILE SUMMARY（摺疊式，手機專用） ── */
+.summary-mobile { display: none; }
+
+@media (max-width: 580px) {
+  .day-summary { display: none; }
+
+  .summary-mobile {
+    display: block;
+    margin: 14px 0 0;
+    border: 1px solid #252525;
+    border-left: 3px solid var(--gold-dim);
+    border-radius: 4px;
+    background: #111010;
+    overflow: hidden;
+  }
+  .summary-mobile-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    cursor: pointer;
+    gap: 8px;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .summary-mobile-label {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+  }
+  .summary-mobile-arrow {
+    font-size: 11px;
+    color: var(--gold-dim);
+    transition: transform .2s;
+    flex-shrink: 0;
+  }
+  .summary-mobile.open .summary-mobile-arrow { transform: rotate(180deg); }
+  .summary-mobile-body {
+    display: none;
+    padding: 0 14px 12px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.8;
+    font-style: italic;
+    border-top: 1px solid #1E1E1E;
+  }
+  .summary-mobile.open .summary-mobile-body { display: block; }
+}
+
 /* ── HOTEL STRIP ── */
 .hotel-strip {
   display: flex; align-items: center; gap: 12px;
@@ -147,31 +197,7 @@ body {
 .table-wrap::-webkit-scrollbar-track { background: transparent; }
 .table-wrap::-webkit-scrollbar-thumb { background: #2A2A2A; border-radius: 2px; }
 
-/* ── STICKY COLUMNS ── */
-/* col 1: 時間/停留 */
-.schedule-table thead th:nth-child(1),
-.schedule-table tbody td:nth-child(1) {
-  position: sticky;
-  left: 0;
-  z-index: 2;
-}
-/* col 2: 地點/活動 */
-.schedule-table thead th:nth-child(2),
-.schedule-table tbody td:nth-child(2) {
-  position: sticky;
-  left: 108px;   /* = col-time width */
-  z-index: 2;
-}
-/* header sticky cells sit above body sticky cells */
-.schedule-table thead th:nth-child(1),
-.schedule-table thead th:nth-child(2) {
-  z-index: 3;
-}
-/* shadow on right edge of sticky cols to hint scrollability */
-.schedule-table tbody td:nth-child(2),
-.schedule-table thead th:nth-child(2) {
-  box-shadow: 4px 0 8px -2px rgba(0,0,0,0.5);
-}
+/* ── STICKY COLUMNS ── (disabled for natural mobile scroll) ── */
 
 /* 欄寬：sticky固定欄 + 可捲動欄 */
 .col-time  { min-width: 108px; width: 108px; }
@@ -295,7 +321,6 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
   .site-header { padding: 14px 14px 0; }
   .main { padding: 20px 10px 60px; }
   .day-date { font-size: 50px; }
-  .day-summary { display: none; }
   /*備註欄在小螢幕透過橫向捲動查看，不隱藏 */
   td { padding: 10px 8px; }
 }
@@ -462,13 +487,12 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
         機上把握時間好好補眠。</div>
     </div>
   </div>
-  <div class="hotel-strip">
-    <span class="hotel-icon">🏨</span>
-    <span class="hotel-label">住宿</span>
-    <span class="hotel-name">台灣 · 回家</span>
-    <a class="hotel-map" href="#" target="_blank">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Google Maps
-    </a>
+  <div class="summary-mobile" id="summary-mobile-day-0">
+    <div class="summary-mobile-toggle" onclick="toggleSummary('day-0')">
+      <span class="summary-mobile-label">✦ 今日行程概覽</span>
+      <span class="summary-mobile-arrow">▾</span>
+    </div>
+    <div class="summary-mobile-body">行前休息，維持良好狀態出發。下午健身消耗體力，晚間從桃園機場搭乘長榮 BR087 直飛巴黎，機上把握時間好好補眠。</div>
   </div>
   <div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#E0924A"></div>接送</div><div class="leg-item"><div class="leg-dot" style="background:#50B8E0"></div>飛機</div></div>
   <div class="table-wrap"><table class="schedule-table">
@@ -535,6 +559,13 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
         旺多姆廣場珠寶街，夜間赴酒店內<br>
         米其林三星 Plenitude 晚宴。</div>
     </div>
+  </div>
+  <div class="summary-mobile" id="summary-mobile-day-1">
+    <div class="summary-mobile-toggle" onclick="toggleSummary('day-1')">
+      <span class="summary-mobile-label">✦ 今日行程概覽</span>
+      <span class="summary-mobile-arrow">▾</span>
+    </div>
+    <div class="summary-mobile-body">飛抵 CDG，計程車直奔 Cheval Blanc，以水療午睡調整時差，下午輕鬆探索旺多姆廣場珠寶街，夜間赴酒店內米其林三星 Plenitude 晚宴。</div>
   </div>
   <div class="hotel-strip">
     <span class="hotel-icon">🏨</span>
@@ -670,6 +701,13 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
         裡的傳統法式餐廳輕鬆用餐。</div>
     </div>
   </div>
+  <div class="summary-mobile" id="summary-mobile-day-2">
+    <div class="summary-mobile-toggle" onclick="toggleSummary('day-2')">
+      <span class="summary-mobile-label">✦ 今日行程概覽</span>
+      <span class="summary-mobile-arrow">▾</span>
+    </div>
+    <div class="summary-mobile-body">以 Cheval Blanc 一星早午餐收尾，下午進羅浮宮深度探索。傍晚搬至聖日耳曼左岸新據點，晚間在巷弄裡的傳統法式餐廳輕鬆用餐。</div>
+  </div>
   <div class="hotel-strip">
     <span class="hotel-icon">🏨</span>
     <span class="hotel-label">住宿</span>
@@ -754,6 +792,13 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
         街，傍晚在樂蓬馬歇頂級超市採買野餐晚餐。</div>
     </div>
   </div>
+  <div class="summary-mobile" id="summary-mobile-day-3">
+    <div class="summary-mobile-toggle" onclick="toggleSummary('day-3')">
+      <span class="summary-mobile-label">✦ 今日行程概覽</span>
+      <span class="summary-mobile-arrow">▾</span>
+    </div>
+    <div class="summary-mobile-body">以塞納河左岸為軸線，從書香咖啡啟程，探訪 Diptyque 創始店，午間赴米其林三星蔬食殿堂 Arpège，下午藥妝・甜點一路掃街，傍晚在樂蓬馬歇頂級超市採買野餐晚餐。</div>
+  </div>
   <div class="hotel-strip">
     <span class="hotel-icon">🏨</span>
     <span class="hotel-label">住宿</span>
@@ -762,7 +807,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Google Maps
     </a>
   </div>
-  <div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#5DBE8A"></div>步行</div><div class="leg-item"><div class="leg-dot" style="background:#6EB8F0"></div>地鐵</div></div>
+  <div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#5DBE8A"></div>步行</div></div>
   <div class="table-wrap"><table class="schedule-table">
     <colgroup><col class="col-time"><col class="col-place"><col class="col-trans"><col class="col-note"></colgroup>
     <thead><tr class="thead-row">
@@ -880,6 +925,13 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
         傍晚返城盛裝赴 Four Seasons 三星晚宴。</div>
     </div>
   </div>
+  <div class="summary-mobile" id="summary-mobile-day-4">
+    <div class="summary-mobile-toggle" onclick="toggleSummary('day-4')">
+      <span class="summary-mobile-label">✦ 今日行程概覽</span>
+      <span class="summary-mobile-arrow">▾</span>
+    </div>
+    <div class="summary-mobile-body">清晨搭 RER C 出發前往凡爾賽，以 Alain Ducasse 主理的宮殿早餐開場，遊覽鏡廳、運河野餐，探索瑪麗安東尼農莊花園。傍晚返城盛裝赴 Four Seasons 三星晚宴。</div>
+  </div>
   <div class="hotel-strip">
     <span class="hotel-icon">🏨</span>
     <span class="hotel-label">住宿</span>
@@ -994,6 +1046,13 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
         歌劇院區覓食輕鬆收尾。</div>
     </div>
   </div>
+  <div class="summary-mobile" id="summary-mobile-day-5">
+    <div class="summary-mobile-toggle" onclick="toggleSummary('day-5')">
+      <span class="summary-mobile-label">✦ 今日行程概覽</span>
+      <span class="summary-mobile-arrow">▾</span>
+    </div>
+    <div class="summary-mobile-body">晨遊布隆尼森林英式花園，在樹蔭深處的 Le Pré Catelan 享用三星午餐。下午穿越至歌劇院、拉法葉百貨逛街，晚間就近在歌劇院區覓食輕鬆收尾。</div>
+  </div>
   <div class="hotel-strip">
     <span class="hotel-icon">🏨</span>
     <span class="hotel-label">住宿</span>
@@ -1002,7 +1061,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Google Maps
     </a>
   </div>
-  <div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#5DBE8A"></div>步行</div><div class="leg-item"><div class="leg-dot" style="background:#E0924A"></div>計程車</div><div class="leg-item"><div class="leg-dot" style="background:#6EB8F0"></div>地鐵</div></div>
+  <div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#5DBE8A"></div>步行</div><div class="leg-item"><div class="leg-dot" style="background:#E0924A"></div>計程車</div></div>
   <div class="table-wrap"><table class="schedule-table">
     <colgroup><col class="col-time"><col class="col-place"><col class="col-trans"><col class="col-note"></colgroup>
     <thead><tr class="thead-row">
@@ -1090,6 +1149,13 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
         接著 agnès b.・Le Mont Saint Michel，晚間越南河粉收場。</div>
     </div>
   </div>
+  <div class="summary-mobile" id="summary-mobile-day-6">
+    <div class="summary-mobile-toggle" onclick="toggleSummary('day-6')">
+      <span class="summary-mobile-label">✦ 今日行程概覽</span>
+      <span class="summary-mobile-arrow">▾</span>
+    </div>
+    <div class="summary-mobile-body">清晨探索巴士底市集，遊覽免費卡納瓦雷博物館，在孚日廣場旁享用三星 L'Ambroisie 午餐。下午 Merci・Jacques Genin 選物巧克力，接著 agnès b.・Le Mont Saint Michel，晚間越南河粉收場。</div>
+  </div>
   <div class="hotel-strip">
     <span class="hotel-icon">🏨</span>
     <span class="hotel-label">住宿</span>
@@ -1098,7 +1164,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Google Maps
     </a>
   </div>
-  <div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#5DBE8A"></div>步行</div><div class="leg-item"><div class="leg-dot" style="background:#6EB8F0"></div>地鐵</div></div>
+  <div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#5DBE8A"></div>步行</div></div>
   <div class="table-wrap"><table class="schedule-table">
     <colgroup><col class="col-time"><col class="col-place"><col class="col-trans"><col class="col-note"></colgroup>
     <thead><tr class="thead-row">
@@ -1198,6 +1264,13 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
         以陶罐燉雞告別晚宴畫下句點。</div>
     </div>
   </div>
+  <div class="summary-mobile" id="summary-mobile-day-7">
+    <div class="summary-mobile-toggle" onclick="toggleSummary('day-7')">
+      <span class="summary-mobile-label">✦ 今日行程概覽</span>
+      <span class="summary-mobile-arrow">▾</span>
+    </div>
+    <div class="summary-mobile-body">以莫內睡蓮開啟最後一日，杜樂麗漫步後赴日法融合三星 Kei 午餐。下午踏遍香榭麗舍購物掃貨，黃昏登上凱旋門俯瞰巴黎全景，以陶罐燉雞告別晚宴畫下句點。</div>
+  </div>
   <div class="hotel-strip">
     <span class="hotel-icon">🏨</span>
     <span class="hotel-label">住宿</span>
@@ -1206,7 +1279,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Google Maps
     </a>
   </div>
-  <div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#5DBE8A"></div>步行</div><div class="leg-item"><div class="leg-dot" style="background:#E0924A"></div>計程車</div><div class="leg-item"><div class="leg-dot" style="background:#6EB8F0"></div>地鐵</div></div>
+  <div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#5DBE8A"></div>步行</div><div class="leg-item"><div class="leg-dot" style="background:#E0924A"></div>計程車</div></div>
   <div class="table-wrap"><table class="schedule-table">
     <colgroup><col class="col-time"><col class="col-place"><col class="col-trans"><col class="col-note"></colgroup>
     <thead><tr class="thead-row">
@@ -1308,6 +1381,13 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
         充滿美食與藝術的巴黎之旅。</div>
     </div>
   </div>
+  <div class="summary-mobile" id="summary-mobile-day-8">
+    <div class="summary-mobile-toggle" onclick="toggleSummary('day-8')">
+      <span class="summary-mobile-label">✦ 今日行程概覽</span>
+      <span class="summary-mobile-arrow">▾</span>
+    </div>
+    <div class="summary-mobile-body">清晨計程車前往 CDG，完成退稅後在免稅區輕鬆候機。搭乘長榮 BR088 直飛桃園，結束這趟充滿美食與藝術的巴黎之旅。</div>
+  </div>
   <div class="hotel-strip">
     <span class="hotel-icon">🏨</span>
     <span class="hotel-label">住宿</span>
@@ -1398,6 +1478,11 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
 </main>
 
 <script>
+
+function toggleSummary(dayId) {
+  const el = document.getElementById('summary-mobile-' + dayId);
+  if (el) el.classList.toggle('open');
+}
 
 const RESTAURANT_DATA = {
   plenitude: {
