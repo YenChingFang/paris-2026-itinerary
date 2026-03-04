@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paris 2026 · 行程細流</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0A0A0A;
+  --bg2:      #0F0F0F;
+  --card:     #181818;
+  --card2:    #131313;
+  --border:   #252525;
+  --gold:     #C8A96E;
+  --gold-lt:  #E8CC94;
+  --gold-dim: #7A6540;
+  --text:     #E8E2D9;
+  --muted:    #A09A94;
+  --dim:      #686360;
+
+  --walk-bg:  #0E2016; --walk:  #5DBE8A;
+  --taxi-bg:  #221508; --taxi:  #E0924A;
+  --metro-bg: #060F1E; --metro: #6EB8F0;
+  --rer-bg:   #100A1E; --rer:   #AA78E8;
+  --plane-bg: #04121C; --plane: #50B8E0;
+  --hotel-bg: #1A1A1A; --hotel: #909090;
+  --car-bg:   #221205; --car:   #E0924A;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+.site-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(10,10,10,0.97);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+  padding: 18px 32px 0;
+}
+.header-top { display: flex; align-items: baseline; gap: 20px; margin-bottom: 14px; }
+.logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; font-weight: 300; letter-spacing: 0.18em; color: var(--gold);
+}
+.logo span { color: var(--muted); font-size: 13px; font-family: 'DM Mono', monospace; letter-spacing: 0.1em; }
+.header-tag { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--muted); margin-left: auto; }
+
+/* ── TABS ── */
+.tabs { display: flex; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex-shrink: 0; padding: 10px 22px 12px;
+  background: none; border: none; border-bottom: 2px solid transparent;
+  color: var(--dim); cursor: pointer; font-family: 'DM Mono', monospace;
+  font-size: 11px; letter-spacing: 0.1em; transition: all .2s; white-space: nowrap;
+}
+.tab:hover { color: var(--muted); }
+.tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+.tab .day-num { display: block; font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+.tab .day-sub { display: block; font-size: 9px; opacity: 0.65; letter-spacing: 0.15em; }
+
+/* ── MAIN ── */
+.main { max-width: 1100px; margin: 0 auto; padding: 44px 28px 100px; }
+
+/* ── DAY HEADER ── */
+.day-header {
+  display: flex; align-items: flex-end; gap: 24px;
+  padding-bottom: 28px; margin-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+.day-date {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 80px; font-weight: 300; line-height: 1;
+  color: var(--gold); letter-spacing: -0.02em; opacity: 0.85; flex-shrink: 0;
+}
+.day-info { padding-bottom: 8px; }
+.day-weekday { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+.day-label { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 300; color: var(--text); letter-spacing: 0.04em; }
+
+.day-summary {
+  margin-left: auto; padding-bottom: 8px; max-width: 340px;
+}
+.summary-text {
+  font-size: 11.5px; color: var(--muted); line-height: 1.85;
+  font-style: italic; text-align: right;
+}
+
+/* ── HOTEL STRIP ── */
+.hotel-strip {
+  display: flex; align-items: center; gap: 12px;
+  background: #141210;
+  border: 1px solid #2E2820;
+  border-left: 3px solid var(--gold-dim);
+  border-radius: 4px;
+  padding: 11px 18px;
+  margin: 20px 0 0;
+}
+.hotel-icon { font-size: 15px; flex-shrink: 0; }
+.hotel-label {
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--muted); flex-shrink: 0;
+}
+.hotel-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px; color: var(--gold-lt); letter-spacing: 0.04em;
+}
+.hotel-map {
+  margin-left: auto; flex-shrink: 0;
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--gold-dim); text-decoration: none;
+  border: 1px solid #3A3020; border-radius: 3px;
+  padding: 5px 12px; transition: all .15s;
+}
+.hotel-map:hover { color: var(--gold); border-color: var(--gold-dim); background: rgba(200,169,110,0.07); }
+.hotel-map svg { width: 11px; height: 11px; }
+
+/* ── LEGEND ── */
+.legend { display: flex; gap: 14px; flex-wrap: wrap; padding: 18px 0 20px; }
+.leg-item { display: flex; align-items: center; gap: 6px; font-size: 10px; letter-spacing: 0.08em; color: var(--muted); }
+.leg-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── TABLE ── */
+.schedule-table { width: max-content; min-width: 100%; border-collapse: separate; border-spacing: 0; }
+
+
+/* ── TABLE SCROLL WRAPPER ── */
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  /* subtle scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: #2A2A2A transparent;
+}
+.table-wrap::-webkit-scrollbar { height: 4px; }
+.table-wrap::-webkit-scrollbar-track { background: transparent; }
+.table-wrap::-webkit-scrollbar-thumb { background: #2A2A2A; border-radius: 2px; }
+
+/* ── STICKY COLUMNS ── */
+/* col 1: 時間/停留 */
+.schedule-table thead th:nth-child(1),
+.schedule-table tbody td:nth-child(1) {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+}
+/* col 2: 地點/活動 */
+.schedule-table thead th:nth-child(2),
+.schedule-table tbody td:nth-child(2) {
+  position: sticky;
+  left: 108px;   /* = col-time width */
+  z-index: 2;
+}
+/* header sticky cells sit above body sticky cells */
+.schedule-table thead th:nth-child(1),
+.schedule-table thead th:nth-child(2) {
+  z-index: 3;
+}
+/* shadow on right edge of sticky cols to hint scrollability */
+.schedule-table tbody td:nth-child(2),
+.schedule-table thead th:nth-child(2) {
+  box-shadow: 4px 0 8px -2px rgba(0,0,0,0.5);
+}
+
+/* 欄寬：sticky固定欄 + 可捲動欄 */
+.col-time  { min-width: 108px; width: 108px; }
+.col-place { min-width: 280px; width: 280px; }
+.col-trans { min-width: 170px; width: 170px; }
+.col-note  { min-width: 280px; width: 280px; }
+
+/* 標題列 */
+.thead-row th {
+  padding: 11px 16px;
+  font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: #D4A853; font-weight: 500; text-align: left;
+  border-top: 1px solid #333028;
+  border-bottom: 2px solid #3A3520;
+  background: #0D0C0A;
+}
+.thead-row th.center { text-align: center; }
+
+/* DATA ROWS */
+/* ── ROW STATES ── */
+.schedule-row { transition: background .15s; cursor: pointer; }
+.schedule-row td {
+  border-bottom: 1px solid #1E1E1E;
+  /* subtle left accent — hidden by default */
+  border-left: 3px solid transparent;
+  transition: background .15s, border-left-color .15s;
+}
+/* first sticky td carries the accent border */
+.schedule-row td:first-child { border-left: 3px solid transparent; transition: background .15s, border-left-color .15s; }
+
+/* ── alternating: very subtle, same temperature ── */
+.schedule-row td            { background: #0F0F0F; }   /* odd  */
+.schedule-row.alt td        { background: #141414; }   /* even */
+
+/* ── star rows always slightly warm ── */
+.schedule-row.star td       { background: #131108; }
+.schedule-row.star.alt td   { background: #161309; }
+
+/* ── HOVER ── */
+.schedule-row:hover td { background: #1E1C14 !important; }
+.schedule-row:hover td:first-child { border-left-color: var(--gold-dim) !important; }
+
+/* ── SELECTED (JS toggles .selected) ── */
+.schedule-row.selected td { background: #221E10 !important; }
+.schedule-row.selected td:first-child { border-left-color: var(--gold) !important; }
+/* selected time glow */
+.schedule-row.selected .time-start { color: var(--gold-lt); }
+/* star selected */
+.schedule-row.star.selected td { background: #2A2108 !important; }
+
+td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
+
+/* ── 時間欄：開始 + 結束 + 停留 ── */
+.td-time { text-align: center; white-space: nowrap; }
+.time-start {
+  font-size: 14px; font-weight: 500; color: var(--gold);
+  letter-spacing: 0.05em; line-height: 1;
+}
+.schedule-row.star .time-start { color: var(--gold-lt); }
+.time-end {
+  font-size: 11px; color: var(--dim);
+  letter-spacing: 0.04em; margin-top: 2px;
+}
+.time-stay {
+  font-size: 10px; color: var(--muted);
+  letter-spacing: 0.06em; margin-top: 3px;
+  border-top: 1px solid #2A2A2A; padding-top: 3px;
+}
+
+/* ── 地點欄 ── */
+.td-place { font-family: 'Cormorant Garamond', serif; font-size: 17px; line-height: 1.35; }
+.place-name      { color: var(--text); letter-spacing: 0.02em; }
+.place-name.star { color: var(--gold-lt); }
+.place-stars     { color: #E8B840; font-size: 12px; margin-right: 3px; }
+
+.map-link {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--dim); text-decoration: none;
+  border: 1px solid #2C2C2C; border-radius: 3px;
+  padding: 2px 7px; margin-left: 9px;
+  transition: all .15s; vertical-align: middle; position: relative; top: -1px;
+}
+.map-link:hover { color: var(--gold); border-color: var(--gold-dim); background: rgba(200,169,110,0.07); }
+.map-link svg { width: 9px; height: 9px; flex-shrink: 0; }
+
+/* ── 交通合併欄 ── */
+.td-trans { text-align: center; }
+.trans-wrap { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; }
+.trans-badge {
+  display: inline-block; padding: 5px 12px; border-radius: 3px;
+  font-size: 10.5px; letter-spacing: 0.06em; white-space: nowrap; font-weight: 500;
+}
+.trans-badge.walk  { background: var(--walk-bg);  color: var(--walk); }
+.trans-badge.taxi  { background: var(--taxi-bg);  color: var(--taxi); }
+.trans-badge.metro { background: var(--metro-bg); color: var(--metro); }
+.trans-badge.rer   { background: var(--rer-bg);   color: var(--rer); }
+.trans-badge.plane { background: var(--plane-bg); color: var(--plane); }
+.trans-badge.hotel { background: var(--hotel-bg); color: var(--hotel); }
+.trans-badge.car   { background: var(--car-bg);   color: var(--car); }
+.trans-badge.none  { color: var(--dim); background: none; }
+
+.trans-time {
+  font-size: 10px; color: var(--muted); letter-spacing: 0.06em;
+}
+
+/* ── 備註欄 — 明顯白色 ── */
+.td-note {
+  font-size: 12px;
+  color: var(--text);      /* 改為主文字色，清晰可讀 */
+  line-height: 1.65;
+}
+
+/* ── DAY VIEW ── */
+.day-view { display: none; }
+.day-view.active { display: block; animation: fadeUp .28s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(7px); } to { opacity:1; transform:translateY(0); } }
+
+@media (max-width: 580px) {
+  .site-header { padding: 14px 14px 0; }
+  .main { padding: 20px 10px 60px; }
+  .day-date { font-size: 50px; }
+  .day-summary { display: none; }
+  /*備註欄在小螢幕透過橫向捲動查看，不隱藏 */
+  td { padding: 10px 8px; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-top">
+    <div class="logo">PARIS <span>2026 · 行程細流</span></div>
+    <div class="header-tag">3/13 — 3/21 · 9天8夜</div>
+  </div>
+  <nav class="tabs">
+    <button class="tab  active" data-day="0"><span class="day-num">3·13</span><span class="day-sub">五・出發</span></button>
+    <button class="tab" data-day="1"><span class="day-num">3·14</span><span class="day-sub">六・抵達</span></button>
+    <button class="tab" data-day="2"><span class="day-num">3·15</span><span class="day-sub">日・羅浮</span></button>
+    <button class="tab" data-day="3"><span class="day-num">3·16</span><span class="day-sub">一・左岸</span></button>
+    <button class="tab" data-day="4"><span class="day-num">3·17</span><span class="day-sub">二・凡爾賽</span></button>
+    <button class="tab" data-day="5"><span class="day-num">3·18</span><span class="day-sub">三・布隆尼</span></button>
+    <button class="tab" data-day="6"><span class="day-num">3·19</span><span class="day-sub">四・瑪黑</span></button>
+    <button class="tab" data-day="7"><span class="day-num">3·20</span><span class="day-sub">五・最後</span></button>
+    <button class="tab" data-day="8"><span class="day-num">3·21</span><span class="day-sub">六・回程</span></button>
+  </nav>
+</header>
+
+<main class="main">
+
+<!-- ══ 13 ══ -->
+<section class="day-view active" id="day-0">
+  <div class="day-header">
+    <div class="day-date">13</div>
+    <div class="day-info">
+      <div class="day-weekday">March 2026 · Friday</div>
+      <div class="day-label">出發日</div>
+    </div>
+    <div class="day-summary">
+      <div class="summary-text">行前休息，維持良好狀態出發。<br>
+        下午健身消耗體力，晚間從桃園<br>
+        機場搭乘長榮 BR087 直飛巴黎，<br>
+        機上把握時間好好補眠。</div>
+    </div>
+  </div>
+  <div class="hotel-strip">
+    <span class="hotel-icon">🏨</span>
+    <span class="hotel-label">住宿</span>
+    <span class="hotel-name">台灣 · 回家</span>
+    <a class="hotel-map" href="#" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Google Maps
+    </a>
+  </div>
+  <div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#E0924A"></div>接送</div><div class="leg-item"><div class="leg-dot" style="background:#50B8E0"></div>飛機</div></div>
+  <div class="table-wrap"><table class="schedule-table">
+    <colgroup><col class="col-time"><col class="col-place"><col class="col-trans"><col class="col-note"></colgroup>
+    <thead><tr class="thead-row">
+      <th class="center">時間 / 停留</th><th>地點 / 活動</th>
+      <th class="center">交通 / 移動時間</th><th>備註</th>
+    </tr></thead>
+    <tbody>
+      <tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">09:30</div>
+          <div class="time-end">→ —</div>
+          <div class="time-stay">—</div>
+        </td>
+        <td class="td-place"><span class="place-name">家</span></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge none">—</span></div></td>
+        <td class="td-note">比平常晚起，好好休息</td>
+      </tr>
+      <tr class="schedule-row alt">
+        <td class="td-time">
+          <div class="time-start">16:00</div>
+          <div class="time-end">→ 17:30</div>
+          <div class="time-stay">1.5 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">健身房</span></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge car">🚗 接送</span><span class="trans-time">—</span></div></td>
+        <td class="td-note">不能午睡，維持清醒</td>
+      </tr>
+      <tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">19:30</div>
+          <div class="time-end">→ 23:00</div>
+          <div class="time-stay">3.5 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">桃園機場 T2</span><a class="map-link" href="https://maps.google.com/?q=Taiwan+Taoyuan+International+Airport+Terminal+2" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge car">🚗 接送</span><span class="trans-time">~60 min</span></div></td>
+        <td class="td-note">預留充裕時間辦登機、過海關</td>
+      </tr>
+      <tr class="schedule-row alt">
+        <td class="td-time">
+          <div class="time-start">23:30</div>
+          <div class="time-end">→ → 翌日</div>
+          <div class="time-stay">13 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">BR087 起飛</span> <a class="map-link" href="https://www.flightaware.com/live/flight/EVA87" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>即時航班</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge plane">✈️ 長榮航空</span><span class="trans-time">13 hr</span></div></td>
+        <td class="td-note">03:30–11:00 睡覺（巴黎時間 21:00–04:00）</td>
+      </tr>
+    </tbody>
+  </table></div>
+</section>
+<!-- ══ 14 ══ -->
+<section class="day-view" id="day-1">
+  <div class="day-header">
+    <div class="day-date">14</div>
+    <div class="day-info">
+      <div class="day-weekday">March 2026 · Saturday</div>
+      <div class="day-label">抵達巴黎</div>
+    </div>
+    <div class="day-summary">
+      <div class="summary-text">飛抵 CDG，計程車直奔 Cheval Blanc，<br>
+        以水療午睡調整時差，下午輕鬆探索<br>
+        旺多姆廣場珠寶街，夜間赴酒店內<br>
+        米其林三星 Plenitude 晚宴。</div>
+    </div>
+  </div>
+  <div class="hotel-strip">
+    <span class="hotel-icon">🏨</span>
+    <span class="hotel-label">住宿</span>
+    <span class="hotel-name">Cheval Blanc Paris</span>
+    <a class="hotel-map" href="https://maps.google.com/?q=Cheval+Blanc+Paris+8+Quai+du+Louvre" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Google Maps
+    </a>
+  </div>
+  <div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#5DBE8A"></div>步行</div><div class="leg-item"><div class="leg-dot" style="background:#E0924A"></div>計程車</div><div class="leg-item"><div class="leg-dot" style="background:#909090"></div>酒店內</div></div>
+  <div class="table-wrap"><table class="schedule-table">
+    <colgroup><col class="col-time"><col class="col-place"><col class="col-trans"><col class="col-note"></colgroup>
+    <thead><tr class="thead-row">
+      <th class="center">時間 / 停留</th><th>地點 / 活動</th>
+      <th class="center">交通 / 移動時間</th><th>備註</th>
+    </tr></thead>
+    <tbody>
+      <tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">07:45</div>
+          <div class="time-end">→ 09:30</div>
+          <div class="time-stay">1.5 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">CDG T1 入境</span><a class="map-link" href="https://maps.google.com/?q=Charles+de+Gaulle+Airport+Terminal+1" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge none">— 入境</span></div></td>
+        <td class="td-note">過海關、提行李、換錢</td>
+      </tr>
+      <tr class="schedule-row alt">
+        <td class="td-time">
+          <div class="time-start">09:30</div>
+          <div class="time-end">→ 10:00</div>
+          <div class="time-stay">—</div>
+        </td>
+        <td class="td-place"><span class="place-name">前往 Cheval Blanc</span><a class="map-link" href="https://maps.google.com/?q=Cheval+Blanc+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge taxi">🚖 計程車</span><span class="trans-time">~45 min</span></div></td>
+        <td class="td-note">A1 高速，非尖峰 30–50 min</td>
+      </tr>
+      <tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">10:00</div>
+          <div class="time-end">→ 11:00</div>
+          <div class="time-stay">1 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">Cheval Blanc Paris 入住</span><a class="map-link" href="https://maps.google.com/?q=Cheval+Blanc+Paris+8+Quai+du+Louvre" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge hotel">🏨 酒店內</span></div></td>
+        <td class="td-note">提早入住需事先確認</td>
+      </tr>
+      <tr class="schedule-row alt">
+        <td class="td-time">
+          <div class="time-start">10:00</div>
+          <div class="time-end">→ 11:00</div>
+          <div class="time-stay">1 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">泳池水療（酒店內）</span><a class="map-link" href="https://maps.google.com/?q=Cheval+Blanc+Paris+8+Quai+du+Louvre" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge hotel">🏨 酒店內</span><span class="trans-time">1 min</span></div></td>
+        <td class="td-note">放鬆調整時差</td>
+      </tr>
+      <tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">11:00</div>
+          <div class="time-end">→ 13:30</div>
+          <div class="time-stay">2.5 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">酒店輕食＋午睡</span><a class="map-link" href="https://maps.google.com/?q=Cheval+Blanc+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge none">—</span></div></td>
+        <td class="td-note">補眠恢復狀態</td>
+      </tr>
+      <tr class="schedule-row alt">
+        <td class="td-time">
+          <div class="time-start">13:30</div>
+          <div class="time-end">→ 15:00</div>
+          <div class="time-stay">1.5 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">莎瑪麗丹百貨</span><a class="map-link" href="https://maps.google.com/?q=La+Samaritaine+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">3 min</span></div></td>
+        <td class="td-note">Cheval Blanc 即在其內</td>
+      </tr>
+      <tr class="schedule-row star">
+        <td class="td-time">
+          <div class="time-start">15:00</div>
+          <div class="time-end">→ 16:30</div>
+          <div class="time-stay">1.5 hr</div>
+        </td>
+        <td class="td-place"><span class="place-stars">⭐</span><span class="place-name  star">Van Cleef & Arpels（旺多姆廣場）</span><a class="map-link" href="https://maps.google.com/?q=Place+Vendôme+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">10 min</span></div></td>
+        <td class="td-note">Place Vendôme 珠寶街</td>
+      </tr>
+      <tr class="schedule-row alt">
+        <td class="td-time">
+          <div class="time-start">16:30</div>
+          <div class="time-end">→ 17:30</div>
+          <div class="time-stay">1 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">Motors Coffee</span><a class="map-link" href="https://maps.google.com/?q=Motors+Coffee+Paris+Rue+Saint-Honoré" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">8 min</span></div></td>
+        <td class="td-note">汽車主題精品咖啡館，旺多姆廣場附近</td>
+      </tr>
+      <tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">17:30</div>
+          <div class="time-end">→ 19:00</div>
+          <div class="time-stay">1.5 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">回酒店梳洗打扮</span><a class="map-link" href="https://maps.google.com/?q=Cheval+Blanc+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">5 min</span></div></td>
+        <td class="td-note">正式晚餐準備</td>
+      </tr>
+      <tr class="schedule-row star alt">
+        <td class="td-time">
+          <div class="time-start">19:00</div>
+          <div class="time-end">→ 21:30</div>
+          <div class="time-stay">2.5 hr</div>
+        </td>
+        <td class="td-place"><span class="place-stars">⭐</span><span class="place-name  star">Plenitude 晚餐</span><a class="map-link" href="https://maps.google.com/?q=Plénitude+Cheval+Blanc+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge hotel">🏨 酒店內</span><span class="trans-time">2 min</span></div></td>
+        <td class="td-note">Cheval Blanc 米其林三星</td>
+      </tr>
+    </tbody>
+  </table></div>
+</section>
+<!-- ══ 15 ══ -->
+<section class="day-view" id="day-2">
+  <div class="day-header">
+    <div class="day-date">15</div>
+    <div class="day-info">
+      <div class="day-weekday">March 2026 · Sunday</div>
+      <div class="day-label">羅浮宮・搬飯店</div>
+    </div>
+    <div class="day-summary">
+      <div class="summary-text">以 Cheval Blanc 一星早午餐收尾，<br>
+        下午進羅浮宮深度探索。傍晚搬至<br>
+        聖日耳曼左岸新據點，晚間在巷弄<br>
+        裡的傳統法式餐廳輕鬆用餐。</div>
+    </div>
+  </div>
+  <div class="hotel-strip">
+    <span class="hotel-icon">🏨</span>
+    <span class="hotel-label">住宿</span>
+    <span class="hotel-name">聖哲曼德佩馨樂庭公寓式酒店</span>
+    <a class="hotel-map" href="https://maps.google.com/?q=Citadines+Saint-Germain-des-Prés+Paris" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Google Maps
+    </a>
+  </div>
+  <div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#5DBE8A"></div>步行</div><div class="leg-item"><div class="leg-dot" style="background:#E0924A"></div>計程車</div><div class="leg-item"><div class="leg-dot" style="background:#909090"></div>酒店內</div></div>
+  <div class="table-wrap"><table class="schedule-table">
+    <colgroup><col class="col-time"><col class="col-place"><col class="col-trans"><col class="col-note"></colgroup>
+    <thead><tr class="thead-row">
+      <th class="center">時間 / 停留</th><th>地點 / 活動</th>
+      <th class="center">交通 / 移動時間</th><th>備註</th>
+    </tr></thead>
+    <tbody>
+      <tr class="schedule-row star">
+        <td class="td-time">
+          <div class="time-start">09:30</div>
+          <div class="time-end">→ 11:30</div>
+          <div class="time-stay">2 hr</div>
+        </td>
+        <td class="td-place"><span class="place-stars">⭐</span><span class="place-name  star">⭐ Le Tout-Paris 早午餐</span><a class="map-link" href="https://maps.google.com/?q=Le+Tout-Paris+Cheval+Blanc" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge hotel">🏨 酒店內</span></div></td>
+        <td class="td-note">Cheval Blanc 7樓一星早午餐</td>
+      </tr>
+      <tr class="schedule-row alt">
+        <td class="td-time">
+          <div class="time-start">14:00</div>
+          <div class="time-end">→ 17:00</div>
+          <div class="time-stay">3 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">羅浮宮</span><a class="map-link" href="https://maps.google.com/?q=Louvre+Museum+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">10 min</span></div></td>
+        <td class="td-note">建議提前預約；希臘雕塑＋印象派</td>
+      </tr>
+      <tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">17:00</div>
+          <div class="time-end">→ 18:00</div>
+          <div class="time-stay">1 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">搬行李換飯店</span><a class="map-link" href="https://maps.google.com/?q=Citadines+Saint-Germain-des-Prés+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge taxi">🚖 計程車</span><span class="trans-time">~15 min</span></div></td>
+        <td class="td-note">跨河至聖哲曼德佩馨樂庭</td>
+      </tr>
+      <tr class="schedule-row alt">
+        <td class="td-time">
+          <div class="time-start">18:30</div>
+          <div class="time-end">→ 19:00</div>
+          <div class="time-stay">30 min</div>
+        </td>
+        <td class="td-place"><span class="place-name">聖哲曼德佩馨樂庭 入住休整</span><a class="map-link" href="https://maps.google.com/?q=Citadines+Saint-Germain-des-Prés+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge none">—</span></div></td>
+        <td class="td-note">換裝準備</td>
+      </tr>
+      <tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">19:00</div>
+          <div class="time-end">→ 21:00</div>
+          <div class="time-stay">2 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">Chez Fernand Christine 晚餐</span><a class="map-link" href="https://maps.google.com/?q=Chez+Fernand+Christine+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">5 min</span></div></td>
+        <td class="td-note">傳統法式，口碑佳</td>
+      </tr>
+    </tbody>
+  </table></div>
+</section>
+<!-- ══ 16 ══ -->
+<section class="day-view" id="day-3">
+  <div class="day-header">
+    <div class="day-date">16</div>
+    <div class="day-info">
+      <div class="day-weekday">March 2026 · Monday</div>
+      <div class="day-label">左岸漫步</div>
+    </div>
+    <div class="day-summary">
+      <div class="summary-text">以塞納河左岸為軸線，從書香咖啡啟程，<br>
+        探訪 Diptyque 創始店，午間赴米其林三星<br>
+        蔬食殿堂 Arpège，下午藥妝・甜點一路掃<br>
+        街，傍晚在樂蓬馬歇頂級超市採買野餐晚餐。</div>
+    </div>
+  </div>
+  <div class="hotel-strip">
+    <span class="hotel-icon">🏨</span>
+    <span class="hotel-label">住宿</span>
+    <span class="hotel-name">聖哲曼德佩馨樂庭公寓式酒店</span>
+    <a class="hotel-map" href="https://maps.google.com/?q=Citadines+Saint-Germain-des-Prés+Paris" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Google Maps
+    </a>
+  </div>
+  <div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#5DBE8A"></div>步行</div><div class="leg-item"><div class="leg-dot" style="background:#6EB8F0"></div>地鐵</div></div>
+  <div class="table-wrap"><table class="schedule-table">
+    <colgroup><col class="col-time"><col class="col-place"><col class="col-trans"><col class="col-note"></colgroup>
+    <thead><tr class="thead-row">
+      <th class="center">時間 / 停留</th><th>地點 / 活動</th>
+      <th class="center">交通 / 移動時間</th><th>備註</th>
+    </tr></thead>
+    <tbody>
+<tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">09:00</div>
+          <div class="time-end">→ 09:45</div>
+          <div class="time-stay">45 min</div>
+        </td>
+        <td class="td-place"><span class="place-name">La Crème de Paris Notre-Dame</span><a class="map-link" href="https://maps.google.com/?q=La+Crème+de+Paris+4+Rue+des+Grands+Degrés+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge none">— 出發點</span></div></td>
+        <td class="td-note">早餐咖啡＋可頌，飯店步行即達</td>
+      </tr>
+<tr class="schedule-row alt">
+        <td class="td-time">
+          <div class="time-start">09:45</div>
+          <div class="time-end">→ 10:15</div>
+          <div class="time-stay">30 min</div>
+        </td>
+        <td class="td-place"><span class="place-name">莎士比亞書店</span><a class="map-link" href="https://maps.google.com/?q=Shakespeare+and+Company+37+Rue+de+la+Bûcherie+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">5 min</span></div></td>
+        <td class="td-note">傳奇英文書店，拍照逛逛</td>
+      </tr>
+<tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">10:00</div>
+          <div class="time-end">→ 10:45</div>
+          <div class="time-stay">45 min</div>
+        </td>
+        <td class="td-place"><span class="place-name">Diptyque 總店</span><a class="map-link" href="https://maps.google.com/?q=Diptyque+34+Boulevard+Saint-Germain+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">8 min</span></div></td>
+        <td class="td-note">34 Blvd Saint-Germain 創始店</td>
+      </tr>
+<tr class="schedule-row alt">
+        <td class="td-time">
+          <div class="time-start">10:45</div>
+          <div class="time-end">→ 11:20</div>
+          <div class="time-stay">35 min</div>
+        </td>
+        <td class="td-place"><span class="place-name">回飯店修整</span><a class="map-link" href="https://maps.google.com/?q=Citadines+Saint-Germain-des-Prés+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">5 min</span></div></td>
+        <td class="td-note">換裝，準備三星午餐</td>
+      </tr>
+<tr class="schedule-row star">
+        <td class="td-time">
+          <div class="time-start">12:00</div>
+          <div class="time-end">→ 14:30</div>
+          <div class="time-stay">2.5 hr</div>
+        </td>
+        <td class="td-place"><span class="place-stars">⭐</span><span class="place-name  star">Arpège 午餐</span><a class="map-link" href="https://maps.google.com/?q=Restaurant+Arpège+84+Rue+de+Varenne+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">12 min</span></div></td>
+        <td class="td-note">蔬食哲學米其林三星，84 Rue de Varenne</td>
+      </tr>
+<tr class="schedule-row alt">
+        <td class="td-time">
+          <div class="time-start">15:00</div>
+          <div class="time-end">→ 15:30</div>
+          <div class="time-stay">30 min</div>
+        </td>
+        <td class="td-place"><span class="place-name">傷兵院外觀</span><a class="map-link" href="https://maps.google.com/?q=Les+Invalides+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">6 min</span></div></td>
+        <td class="td-note">拿破崙長眠之地，金頂壯觀，免費外觀</td>
+      </tr>
+<tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">15:30</div>
+          <div class="time-end">→ 16:30</div>
+          <div class="time-stay">1 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">CityPharma 藥妝</span><a class="map-link" href="https://maps.app.goo.gl/Q8sRHcGRq2NPaWCe9" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">10 min</span></div></td>
+        <td class="td-note">瑪黑區分店，採買藥妝</td>
+      </tr>
+<tr class="schedule-row alt">
+        <td class="td-time">
+          <div class="time-start">16:30</div>
+          <div class="time-end">→ 17:30</div>
+          <div class="time-stay">1 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">Yann Couvreur Pâtisserie</span> <span style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;">· 瑪黑店</span><a class="map-link" href="https://maps.app.goo.gl/UGgm1rr6Cv1P1v7r5" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">~4 min</span></div></td>
+        <td class="td-note">椰子檸檬塔、奇璞必點，23bis Rue des Rosiers</td>
+      </tr>
+<tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">17:30</div>
+          <div class="time-end">→ 20:30</div>
+          <div class="time-stay">3 hr</div>
+        </td>
+        <td class="td-place">
+          <span class="place-name">Le Bon Marché · La Grande Épicerie</span><a class="map-link" href="https://maps.google.com/?q=Le+Bon+Marché+24+Rue+de+Sèvres+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Le Bon Marché</a> <span style="color:var(--dim);font-family:'DM Mono',monospace;font-size:13px;">·</span> <span class="place-name">Lemaire</span><a class="map-link" href="https://maps.google.com/?q=Lemaire+35+Rue+du+Bac+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Lemaire</a>
+        </td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">5 min</span></div></td>
+        <td class="td-note">頂級超市採買 + Lemaire 法式時裝，同棟或步行 2 min</td>
+      </tr>
+    </tbody>
+  </table></div>
+</section>
+<!-- ══ 17 ══ -->
+<section class="day-view" id="day-4">
+  <div class="day-header">
+    <div class="day-date">17</div>
+    <div class="day-info">
+      <div class="day-weekday">March 2026 · Tuesday</div>
+      <div class="day-label">凡爾賽一日</div>
+    </div>
+    <div class="day-summary">
+      <div class="summary-text">清晨搭 RER C 出發前往凡爾賽，以 Alain<br>
+        Ducasse 主理的宮殿早餐開場，遊覽鏡廳、<br>
+        運河野餐，探索瑪麗安東尼農莊花園。<br>
+        傍晚返城盛裝赴 Four Seasons 三星晚宴。</div>
+    </div>
+  </div>
+  <div class="hotel-strip">
+    <span class="hotel-icon">🏨</span>
+    <span class="hotel-label">住宿</span>
+    <span class="hotel-name">聖哲曼德佩馨樂庭公寓式酒店</span>
+    <a class="hotel-map" href="https://maps.google.com/?q=Citadines+Saint-Germain-des-Prés+Paris" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Google Maps
+    </a>
+  </div>
+  <div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#5DBE8A"></div>步行</div><div class="leg-item"><div class="leg-dot" style="background:#E0924A"></div>計程車</div><div class="leg-item"><div class="leg-dot" style="background:#AA78E8"></div>RER C</div></div>
+  <div class="table-wrap"><table class="schedule-table">
+    <colgroup><col class="col-time"><col class="col-place"><col class="col-trans"><col class="col-note"></colgroup>
+    <thead><tr class="thead-row">
+      <th class="center">時間 / 停留</th><th>地點 / 活動</th>
+      <th class="center">交通 / 移動時間</th><th>備註</th>
+    </tr></thead>
+    <tbody>
+      <tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">07:30</div>
+          <div class="time-end">→ 09:00</div>
+          <div class="time-stay">—</div>
+        </td>
+        <td class="td-place"><span class="place-name">飯店出發</span><a class="map-link" href="https://maps.google.com/?q=Citadines+Saint-Germain-des-Prés+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge rer">🚆 RER C（已購票）</span><span class="trans-time">~40 min</span></div></td>
+        <td class="td-note">RER C → Versailles Rive Gauche，步行 10 min 至宮殿正門</td>
+      </tr>
+      <tr class="schedule-row alt">
+        <td class="td-time">
+          <div class="time-start">09:00</div>
+          <div class="time-end">→ 10:00</div>
+          <div class="time-stay">1 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">Ore — Ducasse au Château</span><a class="map-link" href="https://maps.google.com/?q=Restaurant+Ore+Château+de+Versailles" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge none">— 抵達後即用餐</span></div></td>
+        <td class="td-note">Alain Ducasse 主理，宮殿正門旁早餐</td>
+      </tr>
+      <tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">10:00</div>
+          <div class="time-end">→ 12:30</div>
+          <div class="time-stay">2.5 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">凡爾賽宮殿本體</span><a class="map-link" href="https://maps.google.com/?q=Palace+of+Versailles" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">2 min</span></div></td>
+        <td class="td-note">鏡廳、國王寢宮；建議租 Audio Guide</td>
+      </tr>
+      <tr class="schedule-row alt">
+        <td class="td-time">
+          <div class="time-start">12:30</div>
+          <div class="time-end">→ 13:30</div>
+          <div class="time-stay">1 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">大運河畔野餐</span><a class="map-link" href="https://maps.google.com/?q=Grand+Canal+Versailles" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">20 min</span></div></td>
+        <td class="td-note">自備輕食或宮殿內購買，草坪野餐</td>
+      </tr>
+      <tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">13:30</div>
+          <div class="time-end">→ 15:00</div>
+          <div class="time-stay">1.5 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">小特里亞農宮（瑪麗安東尼農莊）</span><a class="map-link" href="https://maps.google.com/?q=Petit+Trianon+Versailles" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">25 min</span></div></td>
+        <td class="td-note">英式花園＋農莊；可租高爾夫球車省 15 min</td>
+      </tr>
+      <tr class="schedule-row alt">
+        <td class="td-time">
+          <div class="time-start">15:00</div>
+          <div class="time-end">→ 16:30</div>
+          <div class="time-stay">—</div>
+        </td>
+        <td class="td-place"><span class="place-name">返回巴黎</span><a class="map-link" href="https://maps.google.com/?q=Versailles+Rive+Gauche+RER+Station" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge rer">🚆 RER C（已購票）</span><span class="trans-time">~40 min</span></div></td>
+        <td class="td-note">RER C → Paris，尖峰前離開較舒適</td>
+      </tr>
+      <tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">16:30</div>
+          <div class="time-end">→ 18:30</div>
+          <div class="time-stay">2 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">飯店休息換裝</span><a class="map-link" href="https://maps.google.com/?q=Citadines+Saint-Germain-des-Prés+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge none">—</span></div></td>
+        <td class="td-note">正裝準備，今晚是重要晚宴</td>
+      </tr>
+      <tr class="schedule-row star alt">
+        <td class="td-time">
+          <div class="time-start">19:30</div>
+          <div class="time-end">→ 22:00</div>
+          <div class="time-stay">2.5 hr</div>
+        </td>
+        <td class="td-place"><span class="place-stars">⭐</span><span class="place-name  star">Le Cinq 晚餐</span><a class="map-link" href="https://maps.google.com/?q=Le+Cinq+Four+Seasons+Hotel+George+V+31+Avenue+George+V+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge taxi">🚖 計程車</span><span class="trans-time">~15 min</span></div></td>
+        <td class="td-note">Four Seasons George V，米其林三星</td>
+      </tr>
+    </tbody>
+  </table></div>
+</section>
+<!-- ══ 18 ══ -->
+<section class="day-view" id="day-5">
+  <div class="day-header">
+    <div class="day-date">18</div>
+    <div class="day-info">
+      <div class="day-weekday">March 2026 · Wednesday</div>
+      <div class="day-label">布隆尼森林</div>
+    </div>
+    <div class="day-summary">
+      <div class="summary-text">晨遊布隆尼森林英式花園，在樹蔭深處的<br>
+        Le Pré Catelan 享用三星午餐。下午穿越<br>
+        至歌劇院、拉法葉百貨逛街，晚間就近在<br>
+        歌劇院區覓食輕鬆收尾。</div>
+    </div>
+  </div>
+  <div class="hotel-strip">
+    <span class="hotel-icon">🏨</span>
+    <span class="hotel-label">住宿</span>
+    <span class="hotel-name">聖哲曼德佩馨樂庭公寓式酒店</span>
+    <a class="hotel-map" href="https://maps.google.com/?q=Citadines+Saint-Germain-des-Prés+Paris" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Google Maps
+    </a>
+  </div>
+  <div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#5DBE8A"></div>步行</div><div class="leg-item"><div class="leg-dot" style="background:#E0924A"></div>計程車</div><div class="leg-item"><div class="leg-dot" style="background:#6EB8F0"></div>地鐵</div></div>
+  <div class="table-wrap"><table class="schedule-table">
+    <colgroup><col class="col-time"><col class="col-place"><col class="col-trans"><col class="col-note"></colgroup>
+    <thead><tr class="thead-row">
+      <th class="center">時間 / 停留</th><th>地點 / 活動</th>
+      <th class="center">交通 / 移動時間</th><th>備註</th>
+    </tr></thead>
+    <tbody>
+<tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">09:00</div>
+          <div class="time-end">→ 09:45</div>
+          <div class="time-stay">45 min</div>
+        </td>
+        <td class="td-place"><span class="place-name">Bonjour Jacob 早餐</span><a class="map-link" href="https://maps.google.com/?q=Bonjour+Jacob+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge none">— 出發點</span></div></td>
+        <td class="td-note">飯店附近咖啡館</td>
+      </tr>
+<tr class="schedule-row alt">
+        <td class="td-time">
+          <div class="time-start">10:30</div>
+          <div class="time-end">→ 11:30</div>
+          <div class="time-stay">1 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">Shakespeare Garden（布隆尼森林）</span><a class="map-link" href="https://maps.google.com/?q=Shakespeare+Garden+Bois+de+Boulogne+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge taxi">🚖 計程車</span><span class="trans-time">~25 min</span></div></td>
+        <td class="td-note">森林中的英式花園，清晨靜謐</td>
+      </tr>
+<tr class="schedule-row star">
+        <td class="td-time">
+          <div class="time-start">12:00</div>
+          <div class="time-end">→ 14:30</div>
+          <div class="time-stay">2.5 hr</div>
+        </td>
+        <td class="td-place"><span class="place-stars">⭐</span><span class="place-name  star">Le Pré Catelan 午餐</span><a class="map-link" href="https://maps.google.com/?q=Le+Pré+Catelan+Bois+de+Boulogne+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">5 min</span></div></td>
+        <td class="td-note">森林中米其林三星，Le Nôtre 花園旁</td>
+      </tr>
+<tr class="schedule-row alt">
+        <td class="td-time">
+          <div class="time-start">15:30</div>
+          <div class="time-end">→ 16:30</div>
+          <div class="time-stay">1 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">歌劇院（Palais Garnier）</span><a class="map-link" href="https://maps.google.com/?q=Palais+Garnier+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge taxi">🚖 計程車</span><span class="trans-time">~30 min</span></div></td>
+        <td class="td-note">購票參觀內部或廣場拍照</td>
+      </tr>
+<tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">16:30</div>
+          <div class="time-end">→ 18:30</div>
+          <div class="time-stay">2 hr</div>
+        </td>
+        <td class="td-place">
+          <span class="place-name">拉法葉百貨</span><a class="map-link" href="https://maps.google.com/?q=Galeries+Lafayette+40+Boulevard+Haussmann+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>拉法葉</a> <span style="color:var(--dim);font-family:'DM Mono',monospace;font-size:13px;">+</span> <span class="place-name">Yann Couvreur 拉法葉店</span><a class="map-link" href="https://maps.google.com/?q=Yann+Couvreur+Galeries+Lafayette+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Yann Couvreur</a>
+        </td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">3 min</span></div></td>
+        <td class="td-note">逛街＋Yann Couvreur 拉法葉店甜點</td>
+      </tr>
+<tr class="schedule-row alt">
+        <td class="td-time">
+          <div class="time-start">19:00</div>
+          <div class="time-end">→ 20:30</div>
+          <div class="time-stay">1.5 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">Spiti Sou 或附近覓食</span><a class="map-link" href="https://maps.google.com/?q=Spiti+Sou+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">~10 min</span></div></td>
+        <td class="td-note">歌劇院區輕鬆晚餐</td>
+      </tr>
+    </tbody>
+  </table></div>
+</section>
+<!-- ══ 19 ══ -->
+<section class="day-view" id="day-6">
+  <div class="day-header">
+    <div class="day-date">19</div>
+    <div class="day-info">
+      <div class="day-weekday">March 2026 · Thursday</div>
+      <div class="day-label">瑪黑區</div>
+    </div>
+    <div class="day-summary">
+      <div class="summary-text">清晨探索巴士底市集，遊覽免費卡納瓦雷<br>
+        博物館，在孚日廣場旁享用三星 L'Ambroisie<br>
+        午餐。下午 Merci・Jacques Genin 選物巧克力，<br>
+        接著 agnès b.・Le Mont Saint Michel，晚間越南河粉收場。</div>
+    </div>
+  </div>
+  <div class="hotel-strip">
+    <span class="hotel-icon">🏨</span>
+    <span class="hotel-label">住宿</span>
+    <span class="hotel-name">聖哲曼德佩馨樂庭公寓式酒店</span>
+    <a class="hotel-map" href="https://maps.google.com/?q=Citadines+Saint-Germain-des-Prés+Paris" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Google Maps
+    </a>
+  </div>
+  <div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#5DBE8A"></div>步行</div><div class="leg-item"><div class="leg-dot" style="background:#6EB8F0"></div>地鐵</div></div>
+  <div class="table-wrap"><table class="schedule-table">
+    <colgroup><col class="col-time"><col class="col-place"><col class="col-trans"><col class="col-note"></colgroup>
+    <thead><tr class="thead-row">
+      <th class="center">時間 / 停留</th><th>地點 / 活動</th>
+      <th class="center">交通 / 移動時間</th><th>備註</th>
+    </tr></thead>
+    <tbody>
+<tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">08:30</div>
+          <div class="time-end">→ 09:45</div>
+          <div class="time-stay">1.25 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">巴士底市集</span><a class="map-link" href="https://maps.google.com/?q=Marché+de+la+Bastille+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge taxi">🚖 計程車</span><span class="trans-time">~15 min</span></div></td>
+        <td class="td-note">周四周日限定，露天農夫市集</td>
+      </tr>
+<tr class="schedule-row alt">
+        <td class="td-time">
+          <div class="time-start">10:00</div>
+          <div class="time-end">→ 11:30</div>
+          <div class="time-stay">1.5 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">卡納瓦雷博物館（免費）</span><a class="map-link" href="https://maps.google.com/?q=Musée+Carnavalet+23+Rue+de+Sévigné+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">10 min</span></div></td>
+        <td class="td-note">巴黎城市歷史，路易十四室必看</td>
+      </tr>
+<tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">11:30</div>
+          <div class="time-end">→ 12:00</div>
+          <div class="time-stay">30 min</div>
+        </td>
+        <td class="td-place"><span class="place-name">孚日廣場</span><a class="map-link" href="https://maps.google.com/?q=Place+des+Vosges+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">5 min</span></div></td>
+        <td class="td-note">巴黎最美廣場，拱廊散步</td>
+      </tr>
+<tr class="schedule-row star alt">
+        <td class="td-time">
+          <div class="time-start">12:15</div>
+          <div class="time-end">→ 15:45</div>
+          <div class="time-stay">3.5 hr</div>
+        </td>
+        <td class="td-place"><span class="place-stars">⭐</span><span class="place-name  star">L'Ambroisie 午餐</span><a class="map-link" href="https://maps.google.com/?q=L'Ambroisie+9+Place+des+Vosges+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">3 min</span></div></td>
+        <td class="td-note">廣場旁米其林三星，9 Place des Vosges</td>
+      </tr>
+<tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">16:00</div>
+          <div class="time-end">→ 17:30</div>
+          <div class="time-stay">1.5 hr</div>
+        </td>
+        <td class="td-place">
+          <span class="place-name">Merci</span><a class="map-link" href="https://maps.google.com/?q=Merci+111+Boulevard+Beaumarchais+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Merci</a> <span style="color:var(--dim);font-family:'DM Mono',monospace;font-size:13px;">·</span> <span class="place-name">Broken Arm</span><a class="map-link" href="https://maps.google.com/?q=The+Broken+Arm+12+Rue+Perrée+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Broken Arm</a> <span style="color:var(--dim);font-family:'DM Mono',monospace;font-size:13px;">·</span> <span class="place-name">Jacques Genin</span><a class="map-link" href="https://maps.google.com/?q=Jacques+Genin+133+Rue+de+Turenne+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Jacques Genin</a>
+        </td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">5 min</span></div></td>
+        <td class="td-note">選物店＋頂級巧克力，瑪黑區就近步行</td>
+      </tr>
+<tr class="schedule-row alt">
+        <td class="td-time">
+          <div class="time-start">17:30</div>
+          <div class="time-end">→ 19:30</div>
+          <div class="time-stay">2 hr</div>
+        </td>
+        <td class="td-place">
+          <span class="place-name">agnès b.</span><a class="map-link" href="https://maps.google.com/?q=agnès+b+2+Rue+du+Jour+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>agnès b.</a> <span style="color:var(--dim);font-family:'DM Mono',monospace;font-size:13px;">·</span> <span class="place-name">Le Mont Saint Michel</span><a class="map-link" href="https://maps.google.com/?q=Le+Mont+Saint+Michel+Paris+Marais" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Le Mont Saint Michel</a>
+        </td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">5 min</span></div></td>
+        <td class="td-note">agnès b. · Le Mont Saint Michel，瑪黑區法式經典品牌</td>
+      </tr>
+<tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">20:00</div>
+          <div class="time-end">→ 21:30</div>
+          <div class="time-stay">1.5 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">Ke Chuan 越南河粉</span><a class="map-link" href="https://maps.google.com/?q=Paris+Vietnamese+restaurant+Marais" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">~10 min</span></div></td>
+        <td class="td-note">換口味，巴黎越南菜口碑選</td>
+      </tr>
+    </tbody>
+  </table></div>
+</section>
+<!-- ══ 20 ══ -->
+<section class="day-view" id="day-7">
+  <div class="day-header">
+    <div class="day-date">20</div>
+    <div class="day-info">
+      <div class="day-weekday">March 2026 · Friday</div>
+      <div class="day-label">最後一天</div>
+    </div>
+    <div class="day-summary">
+      <div class="summary-text">以莫內睡蓮開啟最後一日，杜樂麗漫步後<br>
+        赴日法融合三星 Kei 午餐。下午踏遍香榭麗舍<br>
+        購物掃貨，黃昏登上凱旋門俯瞰巴黎全景，<br>
+        以陶罐燉雞告別晚宴畫下句點。</div>
+    </div>
+  </div>
+  <div class="hotel-strip">
+    <span class="hotel-icon">🏨</span>
+    <span class="hotel-label">住宿</span>
+    <span class="hotel-name">聖哲曼德佩馨樂庭公寓式酒店</span>
+    <a class="hotel-map" href="https://maps.google.com/?q=Citadines+Saint-Germain-des-Prés+Paris" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Google Maps
+    </a>
+  </div>
+  <div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#5DBE8A"></div>步行</div><div class="leg-item"><div class="leg-dot" style="background:#E0924A"></div>計程車</div><div class="leg-item"><div class="leg-dot" style="background:#6EB8F0"></div>地鐵</div></div>
+  <div class="table-wrap"><table class="schedule-table">
+    <colgroup><col class="col-time"><col class="col-place"><col class="col-trans"><col class="col-note"></colgroup>
+    <thead><tr class="thead-row">
+      <th class="center">時間 / 停留</th><th>地點 / 活動</th>
+      <th class="center">交通 / 移動時間</th><th>備註</th>
+    </tr></thead>
+    <tbody>
+<tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">09:00</div>
+          <div class="time-end">→ 09:30</div>
+          <div class="time-stay">30 min</div>
+        </td>
+        <td class="td-place"><span class="place-name">杜樂麗花園</span>
+          <a class="map-link" href="https://maps.google.com/?q=Tuileries+Garden+Paris" target="_blank">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖
+          </a>
+        </td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge none">— 出發點</span></div></td>
+        <td class="td-note">羅丹雕塑，花園晨間散步</td>
+      </tr>
+<tr class="schedule-row alt">
+        <td class="td-time">
+          <div class="time-start">09:30</div>
+          <div class="time-end">→ 11:00</div>
+          <div class="time-stay">1.5 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">橘園美術館</span><a class="map-link" href="https://maps.google.com/?q=Orangerie+Museum+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">3 min</span></div></td>
+        <td class="td-note">莫內睡蓮環形大作，必看</td>
+      </tr>
+<tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">11:00</div>
+          <div class="time-end">→ 12:30</div>
+          <div class="time-stay">1.5 hr</div>
+        </td>
+        <td class="td-place">
+          <span class="place-name">Café Verlet</span><a class="map-link" href="https://maps.google.com/?q=Café+Verlet+256+Rue+Saint-Honoré+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Café Verlet</a> <span style="color:var(--dim);font-family:'DM Mono',monospace;font-size:13px;">・</span> <span class="place-name">Brigitte Tanaka</span><a class="map-link" href="https://maps.google.com/?q=Brigitte+Tanaka+Paris+Rue+de+Rivoli" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Brigitte Tanaka</a>
+        </td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">~8 min</span></div></td>
+        <td class="td-note">Café Verlet 咖啡小憩後逛 Brigitte Tanaka 設計師選物</td>
+      </tr>
+<tr class="schedule-row star alt">
+        <td class="td-time">
+          <div class="time-start">12:45</div>
+          <div class="time-end">→ 15:15</div>
+          <div class="time-stay">2.5 hr</div>
+        </td>
+        <td class="td-place"><span class="place-stars">⭐</span><span class="place-name  star">Kei 午餐</span><a class="map-link" href="https://maps.google.com/?q=Restaurant+Kei+5+Rue+du+Coq+Héron+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">3 min</span></div></td>
+        <td class="td-note">日法融合米其林三星，5 Rue du Coq Héron</td>
+      </tr>
+<tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">16:00</div>
+          <div class="time-end">→ 18:45</div>
+          <div class="time-stay">2.75 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">香榭麗舍大道</span><a class="map-link" href="https://maps.google.com/?q=Champs-Élysées+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge taxi">🚖 計程車</span><span class="trans-time">~10 min</span></div></td>
+        <td class="td-note">最後掃街購物</td>
+      </tr>
+<tr class="schedule-row alt">
+        <td class="td-time">
+          <div class="time-start">18:45</div>
+          <div class="time-end">→ 19:30</div>
+          <div class="time-stay">45 min</div>
+        </td>
+        <td class="td-place"><span class="place-name">凱旋門</span><a class="map-link" href="https://maps.google.com/?q=Arc+de+Triomphe+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">10 min</span></div></td>
+        <td class="td-note">黃昏登頂視野最佳，提前購票</td>
+      </tr>
+<tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">19:30</div>
+          <div class="time-end">→ 21:30</div>
+          <div class="time-stay">2 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">Restaurant Le 703 晚餐</span><a class="map-link" href="https://maps.google.com/?q=Restaurant+Le+703+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge taxi">🚖 計程車</span><span class="trans-time">~15 min</span></div></td>
+        <td class="td-note">陶罐燉雞＋阿爾薩斯氣泡酒，溫馨告別晚宴</td>
+      </tr>
+    </tbody>
+  </table></div>
+</section>
+<!-- ══ 21 ══ -->
+<section class="day-view" id="day-8">
+  <div class="day-header">
+    <div class="day-date">21</div>
+    <div class="day-info">
+      <div class="day-weekday">March 2026 · Saturday</div>
+      <div class="day-label">回程</div>
+    </div>
+    <div class="day-summary">
+      <div class="summary-text">清晨計程車前往 CDG，完成退稅後<br>
+        在免稅區輕鬆候機。搭乘長榮<br>
+        BR088 直飛桃園，結束這趟<br>
+        充滿美食與藝術的巴黎之旅。</div>
+    </div>
+  </div>
+  <div class="hotel-strip">
+    <span class="hotel-icon">🏨</span>
+    <span class="hotel-label">住宿</span>
+    <span class="hotel-name">台灣 · 回家</span>
+    <a class="hotel-map" href="#" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Google Maps
+    </a>
+  </div>
+  <div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#E0924A"></div>計程車</div><div class="leg-item"><div class="leg-dot" style="background:#50B8E0"></div>飛機</div></div>
+  <div class="table-wrap"><table class="schedule-table">
+    <colgroup><col class="col-time"><col class="col-place"><col class="col-trans"><col class="col-note"></colgroup>
+    <thead><tr class="thead-row">
+      <th class="center">時間 / 停留</th><th>地點 / 活動</th>
+      <th class="center">交通 / 移動時間</th><th>備註</th>
+    </tr></thead>
+    <tbody>
+      <tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">05:30</div>
+          <div class="time-end">→ 06:30</div>
+          <div class="time-stay">—</div>
+        </td>
+        <td class="td-place"><span class="place-name">飯店出發</span><a class="map-link" href="https://maps.google.com/?q=Citadines+Saint-Germain-des-Prés+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge taxi">🚖 計程車</span><span class="trans-time">~60 min</span></div></td>
+        <td class="td-note">提前叫車，預留充足緩衝</td>
+      </tr>
+      <tr class="schedule-row alt">
+        <td class="td-time">
+          <div class="time-start">07:30</div>
+          <div class="time-end">→ 09:00</div>
+          <div class="time-stay">1.5 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">CDG T1 報到</span><a class="map-link" href="https://maps.google.com/?q=Charles+de+Gaulle+Airport+Terminal+1" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge none">— 辦理登機</span></div></td>
+        <td class="td-note">國際線建議起飛前 3 hr 到</td>
+      </tr>
+      <tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">09:00</div>
+          <div class="time-end">→ 11:15</div>
+          <div class="time-stay">2.25 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">候機 / 免稅店</span><a class="map-link" href="https://maps.google.com/?q=Charles+de+Gaulle+Airport+Terminal+1" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge none">—</span></div></td>
+        <td class="td-note">PABLO 退稅機台，T1 免稅區</td>
+      </tr>
+      <tr class="schedule-row alt">
+        <td class="td-time">
+          <div class="time-start">11:20</div>
+          <div class="time-end">→ → 翌日</div>
+          <div class="time-stay">~13 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">BR088 起飛</span> <a class="map-link" href="https://www.flightaware.com/live/flight/EVA88" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>即時航班</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge plane">✈️ 長榮航空</span><span class="trans-time">~13 hr</span></div></td>
+        <td class="td-note">CDG → TPE，平安回家</td>
+      </tr>
+    </tbody>
+  </table></div>
+</section>
+</main>
+
+<script>
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.day-view').forEach(d => d.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('day-' + tab.dataset.day).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+document.querySelectorAll('.schedule-row').forEach(row => {
+  row.addEventListener('click', () => {
+    const wasSelected = row.classList.contains('selected');
+    row.closest('table').querySelectorAll('.schedule-row').forEach(r => r.classList.remove('selected'));
+    if (!wasSelected) row.classList.add('selected');
+  });
+});
+</script>
+</body>
+</html>
