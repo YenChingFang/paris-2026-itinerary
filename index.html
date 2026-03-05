@@ -1963,7 +1963,7 @@ let RATE_LOADED = false;
 function updateRateBadges() {
   document.querySelectorAll('.rate-badge').forEach(el => {
     if (RATE_LOADED) {
-      el.textContent = `台灣銀行現金賣出 1 EUR = ${RATE.toFixed(2)} TWD`;
+      el.textContent = `台銀現金賣出均值 1 EUR ≈ ${RATE.toFixed(2)} TWD`;
       el.classList.remove('rate-fallback');
       el.classList.add('rate-live');
     } else {
@@ -1975,50 +1975,53 @@ function updateRateBadges() {
 }
 
 (async function fetchRate() {
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 2048,
-        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-        system: 'You are a data extraction tool. The user will give you a URL. Fetch it and return ONLY the single CSV line that starts with "EUR," — nothing else, no explanation.',
-        messages: [{
-          role: 'user',
-          content: 'Fetch https://rate.bot.com.tw/xrt/flcsv/0/day and return ONLY the one line that starts with EUR, (the full line, all columns, comma-separated). Nothing else.'
-        }]
-      })
-    });
-
-    if (!response.ok) throw new Error('API error ' + response.status);
-    const data = await response.json();
-
-    const allText = (data.content || [])
-      .filter(b => b.type === 'text')
-      .map(b => b.text)
-      .join('\n');
-
-    // 從回應的任意位置找 EUR, 開頭的行
-    const eurMatch = allText.match(/^EUR,[^\n]+/m);
-    if (!eurMatch) throw new Error('找不到 EUR 行，回應：\n' + allText.slice(0, 500));
-
-    const cols = eurMatch[0].split(',');
-
-    // 動態找 Selling 的位置，取下一格（現金賣出）
-    const selIdx = cols.findIndex(c => c.trim() === 'Selling');
-    const cashSellCol = selIdx !== -1 ? cols[selIdx + 1] : cols[12];
-    const v = parseFloat((cashSellCol || '').trim());
-    if (v > 30 && v < 50) {
-      RATE = Math.round(v * 100) / 100;
-      RATE_SOURCE = '台灣銀行現金賣出';
-      RATE_LOADED = true;
-      updateRateBadges();
-      return;
+  // 計算過去14個交易日（週一到週五）
+  function getPast14TradingDays() {
+    const days = [];
+    const d = new Date();
+    while (days.length < 7) {
+      d.setDate(d.getDate() - 1);
+      if (d.getDay() !== 0 && d.getDay() !== 6) { // 非週末
+        days.push(d.toISOString().slice(0, 10)); // YYYY-MM-DD
+      }
     }
-    throw new Error('匯率值不合理: ' + cashSellCol + '，Selling index: ' + selIdx);
+    return days;
+  }
+
+  // fawazahmed0 currency-api：免費、無需 API Key、支援 CORS、支援歷史日期
+  // URL 格式：https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@YYYY-MM-DD/v1/currencies/eur.json
+  async function fetchRateForDate(dateStr) {
+    const url = `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${dateStr}/v1/currencies/eur.json`;
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    const v = j?.eur?.twd;
+    if (!v || v < 30 || v > 50) throw new Error('invalid: ' + v);
+    return v;
+  }
+
+  // 台灣銀行現金賣出 ≈ 市場匯率 + 0.52 TWD（固定加碼，歷史平均）
+  const CASH_SELL_MARKUP = 0.52;
+
+  try {
+    const tradingDays = getPast14TradingDays();
+    const results = await Promise.allSettled(tradingDays.map(fetchRateForDate));
+    const values = results
+      .filter(r => r.status === 'fulfilled')
+      .map(r => r.value);
+
+    if (values.length < 4) throw new Error(`只取得 ${values.length} 筆資料，不足`);
+
+    const avg = values.reduce((a, b) => a + b, 0) / values.length;
+    // 套用現金賣出固定加碼
+    const cashSell = avg + CASH_SELL_MARKUP;
+
+    RATE = Math.round(cashSell * 100) / 100;
+    RATE_SOURCE = `近1週均值（${values.length}筆）`;
+    RATE_LOADED = true;
+    updateRateBadges();
   } catch(e) {
-    console.warn('台灣銀行匯率抓取失敗，使用參考值', e);
+    console.warn('匯率計算失敗，使用參考值', e);
     updateRateBadges();
   }
 })();
@@ -2071,7 +2074,7 @@ function openRestoModal(key) {
       </div>
     `;
 
-    const rateLabel = RATE_LOADED ? `${RATE_SOURCE} 1 EUR ≈ ${RATE.toFixed(2)} TWD` : `匯率 1 EUR : ${RATE} TWD（參考值）`;
+    const rateLabel = RATE_LOADED ? `台銀現金賣出均值 1 EUR ≈ ${RATE.toFixed(2)} TWD` : `匯率 1 EUR : ${RATE} TWD（參考值）`;
     document.getElementById('restoModalFoot').innerHTML = `
       <tr>
         <td class="ft-lbl" colspan="3">
