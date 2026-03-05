@@ -70,6 +70,30 @@ body {
 .tab .day-num { display: block; font-size: 14px; font-weight: 500; margin-bottom: 2px; }
 .tab .day-sub { display: block; font-size: 9px; opacity: 0.65; letter-spacing: 0.12em; }
 
+/* ── 匯率徽章 ── */
+.rate-badge {
+  display: inline-block;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  padding: 2px 7px;
+  border-radius: 3px;
+  border: 1px solid #333;
+  background: #1a1a1a;
+  color: var(--muted);
+  vertical-align: middle;
+  transition: all .3s;
+}
+.rate-badge.rate-live {
+  color: #5DBE8A;
+  border-color: #1E3D2A;
+  background: #0E2016;
+}
+.rate-badge.rate-fallback {
+  color: var(--gold-dim);
+  border-color: #3A3020;
+  background: #131008;
+}
+
 /* ── MAIN ── */
 .main { max-width: 1100px; margin: 0 auto; padding: 44px 28px 100px; }
 
@@ -1242,8 +1266,20 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
       </tr>
 <tr class="schedule-row alt">
         <td class="td-time">
-          <div class="time-start">19:00</div>
-          <div class="time-end">→ 20:30</div>
+          <div class="time-start">18:30</div>
+          <div class="time-end">→ 19:30</div>
+          <div class="time-stay">1 hr</div>
+        </td>
+        <td class="td-place">
+          <span class="place-name">春天百貨</span><a class="map-link" href="https://maps.google.com/?q=Printemps+Haussmann+64+Boulevard+Haussmann+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a>
+        </td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">3 min</span></div></td>
+        <td class="td-note">美妝家居館（Printemps Beauté &amp; Maison）9F 免費 360° 觀景露台</td>
+      </tr>
+<tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">19:30</div>
+          <div class="time-end">→ 21:00</div>
           <div class="time-stay">1.5 hr</div>
         </td>
         <td class="td-place"><span class="place-name">Spiti Sou 或附近覓食</span><button class="menu-badge" onclick="openRestoModal('spitisou')">🍽 菜單</button><a class="map-link" href="https://maps.google.com/?q=Spiti+Sou+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
@@ -1919,7 +1955,73 @@ const RESTAURANT_DATA = {
   }
 };
 
-const RATE = 37;
+// ── 即時匯率 EUR→TWD ─────────────────────────────────────────────────────────
+let RATE = 37; // fallback
+let RATE_SOURCE = '預設值';
+let RATE_LOADED = false;
+
+function updateRateBadges() {
+  document.querySelectorAll('.rate-badge').forEach(el => {
+    if (RATE_LOADED) {
+      el.textContent = `台灣銀行現金賣出 1 EUR = ${RATE.toFixed(2)} TWD`;
+      el.classList.remove('rate-fallback');
+      el.classList.add('rate-live');
+    } else {
+      el.textContent = `1 EUR ≈ ${RATE} TWD（參考值）`;
+      el.classList.remove('rate-live');
+      el.classList.add('rate-fallback');
+    }
+  });
+}
+
+(async function fetchRate() {
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2048,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        system: 'You are a data extraction tool. The user will give you a URL. Fetch it and return ONLY the single CSV line that starts with "EUR," — nothing else, no explanation.',
+        messages: [{
+          role: 'user',
+          content: 'Fetch https://rate.bot.com.tw/xrt/flcsv/0/day and return ONLY the one line that starts with EUR, (the full line, all columns, comma-separated). Nothing else.'
+        }]
+      })
+    });
+
+    if (!response.ok) throw new Error('API error ' + response.status);
+    const data = await response.json();
+
+    const allText = (data.content || [])
+      .filter(b => b.type === 'text')
+      .map(b => b.text)
+      .join('\n');
+
+    // 從回應的任意位置找 EUR, 開頭的行
+    const eurMatch = allText.match(/^EUR,[^\n]+/m);
+    if (!eurMatch) throw new Error('找不到 EUR 行，回應：\n' + allText.slice(0, 500));
+
+    const cols = eurMatch[0].split(',');
+
+    // 動態找 Selling 的位置，取下一格（現金賣出）
+    const selIdx = cols.findIndex(c => c.trim() === 'Selling');
+    const cashSellCol = selIdx !== -1 ? cols[selIdx + 1] : cols[12];
+    const v = parseFloat((cashSellCol || '').trim());
+    if (v > 30 && v < 50) {
+      RATE = Math.round(v * 100) / 100;
+      RATE_SOURCE = '台灣銀行現金賣出';
+      RATE_LOADED = true;
+      updateRateBadges();
+      return;
+    }
+    throw new Error('匯率值不合理: ' + cashSellCol + '，Selling index: ' + selIdx);
+  } catch(e) {
+    console.warn('台灣銀行匯率抓取失敗，使用參考值', e);
+    updateRateBadges();
+  }
+})();
 
 function openRestoModal(key) {
   const d = RESTAURANT_DATA[key];
@@ -1927,57 +2029,61 @@ function openRestoModal(key) {
   document.getElementById('restoModalTitle').textContent = d.name;
   document.getElementById('restoModalStars').textContent = d.stars;
 
-  let totalEUR = 0;
-  let totalTWD = 0;
-  let rows = '';
-  d.items.forEach(it => {
-    const lineEUR = Math.round(it.price * it.qty);
-    const lineTWD = Math.round(lineEUR * RATE);
-    totalEUR += lineEUR;
-    totalTWD += lineTWD;
-    rows += `<tr>
-      <td>
-        <div class="resto-item-zh">${it.zh}</div>
-        <div class="resto-item-fr">${it.fr}</div>
-      </td>
-      <td class="r eur">${it.price.toLocaleString()}</td>
-      <td class="r">${it.qty}</td>
-      <td class="r eur">${lineEUR.toLocaleString()}</td>
-      <td class="r">${lineTWD.toLocaleString()}</td>
-    </tr>`;
-  });
-  document.getElementById('restoModalItems').innerHTML = rows;
+  function buildModal() {
+    let totalEUR = 0;
+    let totalTWD = 0;
+    let rows = '';
+    d.items.forEach(it => {
+      const lineEUR = Math.round(it.price * it.qty);
+      const lineTWD = Math.round(lineEUR * RATE);
+      totalEUR += lineEUR;
+      totalTWD += lineTWD;
+      rows += `<tr>
+        <td>
+          <div class="resto-item-zh">${it.zh}</div>
+          <div class="resto-item-fr">${it.fr}</div>
+        </td>
+        <td class="r eur">${it.price.toLocaleString()}</td>
+        <td class="r">${it.qty}</td>
+        <td class="r eur">${lineEUR.toLocaleString()}</td>
+        <td class="r">${lineTWD.toLocaleString()}</td>
+      </tr>`;
+    });
+    document.getElementById('restoModalItems').innerHTML = rows;
 
-  // stats
-  const itemCount = d.items.reduce((a,b) => a + b.qty, 0);
-  document.getElementById('restoModalStats').innerHTML = `
-    <div class="resto-stat">
-      <div class="resto-stat-val">${d.items.length}</div>
-      <div class="resto-stat-lbl">菜色項目</div>
-    </div>
-    <div class="resto-stat">
-      <div class="resto-stat-val">${itemCount}</div>
-      <div class="resto-stat-lbl">點餐份數</div>
-    </div>
-    <div class="resto-stat">
-      <div class="resto-stat-val">€${totalEUR.toLocaleString()}</div>
-      <div class="resto-stat-lbl">總計 EUR</div>
-    </div>
-    <div class="resto-stat">
-      <div class="resto-stat-val">$${totalTWD.toLocaleString()}</div>
-      <div class="resto-stat-lbl">總計 TWD</div>
-    </div>
-  `;
+    const itemCount = d.items.reduce((a,b) => a + b.qty, 0);
+    document.getElementById('restoModalStats').innerHTML = `
+      <div class="resto-stat">
+        <div class="resto-stat-val">${d.items.length}</div>
+        <div class="resto-stat-lbl">菜色項目</div>
+      </div>
+      <div class="resto-stat">
+        <div class="resto-stat-val">${itemCount}</div>
+        <div class="resto-stat-lbl">點餐份數</div>
+      </div>
+      <div class="resto-stat">
+        <div class="resto-stat-val">€${totalEUR.toLocaleString()}</div>
+        <div class="resto-stat-lbl">總計 EUR</div>
+      </div>
+      <div class="resto-stat">
+        <div class="resto-stat-val">NT$${totalTWD.toLocaleString()}</div>
+        <div class="resto-stat-lbl">總計 TWD</div>
+      </div>
+    `;
 
-  // footer
-  document.getElementById('restoModalFoot').innerHTML = `
-    <tr>
-      <td class="ft-lbl" colspan="3">合計（匯率 1 EUR : ${RATE} TWD）</td>
-      <td class="ft-eur">€ ${totalEUR.toLocaleString()}</td>
-      <td class="ft-twd">NT$ ${totalTWD.toLocaleString()}</td>
-    </tr>
-  `;
+    const rateLabel = RATE_LOADED ? `${RATE_SOURCE} 1 EUR ≈ ${RATE.toFixed(2)} TWD` : `匯率 1 EUR : ${RATE} TWD（參考值）`;
+    document.getElementById('restoModalFoot').innerHTML = `
+      <tr>
+        <td class="ft-lbl" colspan="3">
+          合計（<span class="rate-badge ${RATE_LOADED ? 'rate-live' : 'rate-fallback'}">${rateLabel}</span>）
+        </td>
+        <td class="ft-eur">€ ${totalEUR.toLocaleString()}</td>
+        <td class="ft-twd">NT$ ${totalTWD.toLocaleString()}</td>
+      </tr>
+    `;
+  }
 
+  buildModal();
   document.getElementById('restoModalOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
