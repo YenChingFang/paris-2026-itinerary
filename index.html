@@ -2295,6 +2295,25 @@ document.querySelectorAll('.tab').forEach(tab => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 });
+
+// 自動切換到當日 tab
+(function() {
+  const TRIP_DATES = ['2026-03-13','2026-03-14','2026-03-15','2026-03-16','2026-03-17','2026-03-18','2026-03-19','2026-03-20','2026-03-21'];
+  const today = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const todayStr = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+  const idx = TRIP_DATES.indexOf(todayStr);
+  if (idx !== -1) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.day-view').forEach(d => d.classList.remove('active'));
+    const targetTab = document.querySelector(`.tab[data-day="${idx}"]`);
+    if (targetTab) {
+      targetTab.classList.add('active');
+      targetTab.scrollIntoView({ inline: 'center', behavior: 'smooth' });
+    }
+    document.getElementById('day-' + idx).classList.add('active');
+  }
+})();
 document.querySelectorAll('.schedule-row').forEach(row => {
   row.addEventListener('click', () => {
     const wasSelected = row.classList.contains('selected');
