@@ -121,6 +121,14 @@ body {
   padding-bottom: 8px;
 }
 
+/* 天氣 + 穿搭按鈕垂直堆疊 */
+.wx-outfit-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+
 .day-summary {
   max-width: 280px;
 }
@@ -574,6 +582,153 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
 }
 .menu-badge:hover { color: var(--gold); border-color: var(--gold-dim); background: rgba(200,169,110,0.08); }
 
+/* ══ OUTFIT BUTTON — 樣式跟天氣按鈕一致 ══ */
+.outfit-btn {
+  display: flex; align-items: center; gap: 7px;
+  padding: 7px 13px;
+  background: #0F0E0C;
+  border: 1px solid #2A2520;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  transition: border-color .15s, background .15s;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  width: 100%;
+}
+.outfit-btn:hover { border-color: var(--gold-dim); background: #141210; }
+.outfit-btn-icon  { font-size: 18px; line-height: 1; }
+.outfit-btn-label { font-size: 12px; color: var(--muted); font-weight: 500; letter-spacing: 0.04em; }
+
+/* 桌機版：outfit 按鈕嵌在 summary-text 標題列 */
+.summary-header {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: 10px; margin-bottom: 6px;
+}
+.summary-label-desktop {
+  font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--gold-dim);
+}
+
+/* ══ OUTFIT MODAL ══ */
+.outfit-modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0.80); backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  align-items: center; justify-content: center; padding: 16px;
+}
+.outfit-modal-overlay.open { display: flex; animation: mFadeIn .22s ease; }
+
+.outfit-modal {
+  background: #111111; border: 1px solid #252525;
+  border-top: 2px solid var(--gold);
+  border-radius: 6px; width: 100%; max-width: 560px;
+  max-height: 88vh; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: #2A2A2A transparent;
+  animation: mSlideUp .24s ease; position: relative;
+}
+
+.outfit-modal-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 20px 22px 14px; border-bottom: 1px solid #1E1E1E;
+  position: sticky; top: 0; background: #111111; z-index: 2;
+}
+.outfit-modal-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; font-weight: 300; color: var(--gold-lt); letter-spacing: 0.06em;
+}
+.outfit-modal-sub { font-size: 10px; color: var(--dim); letter-spacing: 0.2em; text-transform: uppercase; margin-top: 4px; }
+.outfit-modal-close {
+  background: none; border: none; cursor: pointer;
+  color: var(--dim); font-size: 20px; padding: 2px 6px; line-height: 1;
+  transition: color .15s; flex-shrink: 0; margin-left: 12px;
+}
+.outfit-modal-close:hover { color: var(--gold); }
+
+/* gender toggle */
+.outfit-gender-tabs {
+  display: flex; border-bottom: 1px solid #1E1E1E;
+}
+.outfit-gender-tab {
+  flex: 1; padding: 11px 0; text-align: center;
+  background: none; border: none; cursor: pointer;
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--dim); border-bottom: 2px solid transparent;
+  transition: all .2s; margin-bottom: -1px;
+}
+.outfit-gender-tab:hover { color: var(--muted); }
+.outfit-gender-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+/* tips strip */
+.outfit-tips {
+  margin: 14px 20px 0;
+  padding: 10px 14px;
+  background: #0D0C0A;
+  border: 1px solid #2A2518;
+  border-left: 3px solid var(--gold-dim);
+  border-radius: 3px;
+}
+.outfit-tips-label {
+  font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--gold-dim); margin-bottom: 6px;
+}
+.outfit-tips-list {
+  list-style: none; padding: 0; margin: 0;
+}
+.outfit-tips-list li {
+  font-size: 11.5px; color: var(--muted); line-height: 1.7;
+  padding-left: 12px; position: relative;
+}
+.outfit-tips-list li::before {
+  content: '·'; position: absolute; left: 0; color: var(--gold-dim);
+}
+
+/* sections */
+.outfit-section {
+  padding: 16px 20px 4px;
+  border-bottom: 1px solid #1A1A1A;
+}
+.outfit-section:last-child { border-bottom: none; padding-bottom: 18px; }
+.outfit-section-title {
+  font-size: 9px; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--dim); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.outfit-section-title::after {
+  content: ''; flex: 1; height: 1px; background: #1E1E1E;
+}
+
+/* item rows */
+.outfit-row {
+  display: grid; grid-template-columns: 64px 1fr;
+  gap: 0; margin-bottom: 8px; align-items: start;
+}
+.outfit-label {
+  font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--dim); padding-top: 2px;
+}
+.outfit-value {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px; color: var(--text); letter-spacing: 0.02em; line-height: 1.4;
+}
+.outfit-value.highlight { color: #E0924A; }
+.outfit-value.highlight-blue { color: #6EB8F0; }
+
+.outfit-empty {
+  padding: 28px 20px; text-align: center;
+  font-size: 11px; color: #3A3A3A; letter-spacing: 0.12em; font-style: italic;
+}
+
+/* weather note in modal */
+.outfit-wx-note {
+  margin: 14px 20px 0; padding: 8px 14px;
+  background: #0A0E14; border: 1px solid #141C28;
+  border-radius: 3px; font-size: 10.5px; color: var(--dim);
+  letter-spacing: 0.06em; display: flex; align-items: center; gap: 8px;
+}
+.outfit-wx-note .temp { color: #6EB8F0; font-weight: 500; }
+
 </style>
 </head>
 <body>
@@ -606,8 +761,9 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
       <div class="day-label">出發日</div>
     </div>
     <div class="day-header-right">
-      <div class="wx-wrap" id="wx-wrap-day-0"></div>
-      <div class="day-summary">
+      <div class="wx-outfit-wrap"><div class="wx-wrap" id="wx-wrap-day-0"></div>
+      <button class="outfit-btn" onclick="openOutfitModal(0)"><span class="outfit-btn-icon">👗</span><span class="outfit-btn-label">今日穿搭</span></button></div>
+      <div class="day-summary"><div class="summary-header"><span class="summary-label-desktop">✦ 今日行程概覽</span></div>
       <div class="summary-text">行前休息，維持良好狀態出發。<br>
         下午健身消耗體力，晚間從桃園<br>
         機場搭乘長榮 BR087 直飛巴黎，<br>
@@ -618,7 +774,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
   <div class="summary-mobile" id="summary-mobile-day-0">
     <div class="summary-mobile-toggle" onclick="toggleSummary('day-0')">
       <span class="summary-mobile-label">✦ 今日行程概覽</span>
-      <span class="summary-mobile-arrow">▾</span>
+          <span class="summary-mobile-arrow">▾</span>
     </div>
     <div class="summary-mobile-body">行前休息，維持良好狀態出發。下午健身消耗體力，晚間從桃園機場搭乘長榮 BR087 直飛巴黎，機上把握時間好好補眠。</div>
   </div>
@@ -682,8 +838,9 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
       <div class="day-label">抵達巴黎</div>
     </div>
     <div class="day-header-right">
-      <div class="wx-wrap" id="wx-wrap-day-1"></div>
-      <div class="day-summary">
+      <div class="wx-outfit-wrap"><div class="wx-wrap" id="wx-wrap-day-1"></div>
+      <button class="outfit-btn" onclick="openOutfitModal(1)"><span class="outfit-btn-icon">👗</span><span class="outfit-btn-label">今日穿搭</span></button></div>
+      <div class="day-summary"><div class="summary-header"><span class="summary-label-desktop">✦ 今日行程概覽</span></div>
       <div class="summary-text">飛抵 CDG，計程車直奔 Cheval Blanc，<br>
         以水療午睡調整時差，下午輕鬆探索<br>
         旺多姆廣場珠寶街，夜間赴酒店內<br>
@@ -694,7 +851,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
   <div class="summary-mobile" id="summary-mobile-day-1">
     <div class="summary-mobile-toggle" onclick="toggleSummary('day-1')">
       <span class="summary-mobile-label">✦ 今日行程概覽</span>
-      <span class="summary-mobile-arrow">▾</span>
+          <span class="summary-mobile-arrow">▾</span>
     </div>
     <div class="summary-mobile-body">飛抵 CDG，計程車直奔 Cheval Blanc，以水療午睡調整時差，下午輕鬆探索旺多姆廣場珠寶街，夜間赴酒店內米其林三星 Plenitude 晚宴。</div>
   </div>
@@ -826,8 +983,9 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
       <div class="day-label">羅浮宮・搬飯店</div>
     </div>
     <div class="day-header-right">
-      <div class="wx-wrap" id="wx-wrap-day-2"></div>
-      <div class="day-summary">
+      <div class="wx-outfit-wrap"><div class="wx-wrap" id="wx-wrap-day-2"></div>
+      <button class="outfit-btn" onclick="openOutfitModal(2)"><span class="outfit-btn-icon">👗</span><span class="outfit-btn-label">今日穿搭</span></button></div>
+      <div class="day-summary"><div class="summary-header"><span class="summary-label-desktop">✦ 今日行程概覽</span></div>
       <div class="summary-text">以 Cheval Blanc 一星早午餐收尾，<br>
         下午進羅浮宮深度探索。傍晚搬至<br>
         聖日耳曼左岸新據點，晚間在巷弄<br>
@@ -838,7 +996,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
   <div class="summary-mobile" id="summary-mobile-day-2">
     <div class="summary-mobile-toggle" onclick="toggleSummary('day-2')">
       <span class="summary-mobile-label">✦ 今日行程概覽</span>
-      <span class="summary-mobile-arrow">▾</span>
+          <span class="summary-mobile-arrow">▾</span>
     </div>
     <div class="summary-mobile-body">以 Cheval Blanc 一星早午餐收尾，下午進羅浮宮深度探索。傍晚搬至聖日耳曼左岸新據點，晚間在巷弄裡的傳統法式餐廳輕鬆用餐。</div>
   </div>
@@ -920,8 +1078,9 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
       <div class="day-label">左岸漫步</div>
     </div>
     <div class="day-header-right">
-      <div class="wx-wrap" id="wx-wrap-day-3"></div>
-      <div class="day-summary">
+      <div class="wx-outfit-wrap"><div class="wx-wrap" id="wx-wrap-day-3"></div>
+      <button class="outfit-btn" onclick="openOutfitModal(3)"><span class="outfit-btn-icon">👗</span><span class="outfit-btn-label">今日穿搭</span></button></div>
+      <div class="day-summary"><div class="summary-header"><span class="summary-label-desktop">✦ 今日行程概覽</span></div>
       <div class="summary-text">以塞納河左岸為軸線，從書香咖啡啟程，<br>
         探訪 Diptyque 創始店，午間赴米其林三星<br>
         蔬食殿堂 Arpège，下午藥妝・甜點一路掃<br>
@@ -932,7 +1091,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
   <div class="summary-mobile" id="summary-mobile-day-3">
     <div class="summary-mobile-toggle" onclick="toggleSummary('day-3')">
       <span class="summary-mobile-label">✦ 今日行程概覽</span>
-      <span class="summary-mobile-arrow">▾</span>
+          <span class="summary-mobile-arrow">▾</span>
     </div>
     <div class="summary-mobile-body">以塞納河左岸為軸線，從書香咖啡啟程，探訪 Diptyque 創始店，午間赴米其林三星蔬食殿堂 Arpège，下午藥妝・甜點一路掃街，傍晚在樂蓬馬歇頂級超市採買野餐晚餐。</div>
   </div>
@@ -1056,8 +1215,9 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
       <div class="day-label">凡爾賽一日</div>
     </div>
     <div class="day-header-right">
-      <div class="wx-wrap" id="wx-wrap-day-4"></div>
-      <div class="day-summary">
+      <div class="wx-outfit-wrap"><div class="wx-wrap" id="wx-wrap-day-4"></div>
+      <button class="outfit-btn" onclick="openOutfitModal(4)"><span class="outfit-btn-icon">👗</span><span class="outfit-btn-label">今日穿搭</span></button></div>
+      <div class="day-summary"><div class="summary-header"><span class="summary-label-desktop">✦ 今日行程概覽</span></div>
       <div class="summary-text">清晨搭 RER C 出發前往凡爾賽，以 Alain<br>
         Ducasse 主理的宮殿早餐開場，遊覽鏡廳、<br>
         運河野餐，探索瑪麗安東尼農莊花園。<br>
@@ -1068,7 +1228,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
   <div class="summary-mobile" id="summary-mobile-day-4">
     <div class="summary-mobile-toggle" onclick="toggleSummary('day-4')">
       <span class="summary-mobile-label">✦ 今日行程概覽</span>
-      <span class="summary-mobile-arrow">▾</span>
+          <span class="summary-mobile-arrow">▾</span>
     </div>
     <div class="summary-mobile-body">清晨搭 RER C 出發前往凡爾賽，以 Alain Ducasse 主理的宮殿早餐開場，遊覽鏡廳、運河野餐，探索瑪麗安東尼農莊花園。傍晚返城盛裝赴 Four Seasons 三星晚宴。</div>
   </div>
@@ -1180,8 +1340,9 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
       <div class="day-label">布隆尼森林</div>
     </div>
     <div class="day-header-right">
-      <div class="wx-wrap" id="wx-wrap-day-5"></div>
-      <div class="day-summary">
+      <div class="wx-outfit-wrap"><div class="wx-wrap" id="wx-wrap-day-5"></div>
+      <button class="outfit-btn" onclick="openOutfitModal(5)"><span class="outfit-btn-icon">👗</span><span class="outfit-btn-label">今日穿搭</span></button></div>
+      <div class="day-summary"><div class="summary-header"><span class="summary-label-desktop">✦ 今日行程概覽</span></div>
       <div class="summary-text">晨遊布隆尼森林英式花園，在樹蔭深處的<br>
         Le Pré Catelan 享用三星午餐。下午穿越<br>
         至歌劇院、拉法葉百貨逛街，晚間就近在<br>
@@ -1192,7 +1353,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
   <div class="summary-mobile" id="summary-mobile-day-5">
     <div class="summary-mobile-toggle" onclick="toggleSummary('day-5')">
       <span class="summary-mobile-label">✦ 今日行程概覽</span>
-      <span class="summary-mobile-arrow">▾</span>
+          <span class="summary-mobile-arrow">▾</span>
     </div>
     <div class="summary-mobile-body">晨遊布隆尼森林英式花園，在樹蔭深處的 Le Pré Catelan 享用三星午餐。下午穿越至歌劇院、拉法葉百貨逛街，晚間就近在歌劇院區覓食輕鬆收尾。</div>
   </div>
@@ -1298,8 +1459,9 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
       <div class="day-label">瑪黑區</div>
     </div>
     <div class="day-header-right">
-      <div class="wx-wrap" id="wx-wrap-day-6"></div>
-      <div class="day-summary">
+      <div class="wx-outfit-wrap"><div class="wx-wrap" id="wx-wrap-day-6"></div>
+      <button class="outfit-btn" onclick="openOutfitModal(6)"><span class="outfit-btn-icon">👗</span><span class="outfit-btn-label">今日穿搭</span></button></div>
+      <div class="day-summary"><div class="summary-header"><span class="summary-label-desktop">✦ 今日行程概覽</span></div>
       <div class="summary-text">清晨探索巴士底市集，遊覽免費卡納瓦雷<br>
         博物館，在孚日廣場旁享用三星 L'Ambroisie<br>
         午餐。下午 Merci・Jacques Genin 選物巧克力，<br>
@@ -1310,7 +1472,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
   <div class="summary-mobile" id="summary-mobile-day-6">
     <div class="summary-mobile-toggle" onclick="toggleSummary('day-6')">
       <span class="summary-mobile-label">✦ 今日行程概覽</span>
-      <span class="summary-mobile-arrow">▾</span>
+          <span class="summary-mobile-arrow">▾</span>
     </div>
     <div class="summary-mobile-body">清晨探索巴士底市集，遊覽免費卡納瓦雷博物館，在孚日廣場旁享用三星 L'Ambroisie 午餐。下午 Merci・Jacques Genin 選物巧克力，接著 agnès b.・Le Mont Saint Michel，晚間越南河粉收場。</div>
   </div>
@@ -1416,8 +1578,9 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
       <div class="day-label">最後一天</div>
     </div>
     <div class="day-header-right">
-      <div class="wx-wrap" id="wx-wrap-day-7"></div>
-      <div class="day-summary">
+      <div class="wx-outfit-wrap"><div class="wx-wrap" id="wx-wrap-day-7"></div>
+      <button class="outfit-btn" onclick="openOutfitModal(7)"><span class="outfit-btn-icon">👗</span><span class="outfit-btn-label">今日穿搭</span></button></div>
+      <div class="day-summary"><div class="summary-header"><span class="summary-label-desktop">✦ 今日行程概覽</span></div>
       <div class="summary-text">以莫內睡蓮開啟最後一日，杜樂麗漫步後<br>
         赴日法融合三星 Kei 午餐。下午踏遍香榭麗舍<br>
         購物掃貨，黃昏登上凱旋門俯瞰巴黎全景，<br>
@@ -1428,7 +1591,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
   <div class="summary-mobile" id="summary-mobile-day-7">
     <div class="summary-mobile-toggle" onclick="toggleSummary('day-7')">
       <span class="summary-mobile-label">✦ 今日行程概覽</span>
-      <span class="summary-mobile-arrow">▾</span>
+          <span class="summary-mobile-arrow">▾</span>
     </div>
     <div class="summary-mobile-body">以莫內睡蓮開啟最後一日，杜樂麗漫步後赴日法融合三星 Kei 午餐。下午踏遍香榭麗舍購物掃貨，黃昏登上凱旋門俯瞰巴黎全景，以陶罐燉雞告別晚宴畫下句點。</div>
   </div>
@@ -1497,24 +1660,34 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
 <tr class="schedule-row">
         <td class="td-time">
           <div class="time-start">16:00</div>
-          <div class="time-end">→ 18:45</div>
-          <div class="time-stay">2.75 hr</div>
+          <div class="time-end">→ 17:00</div>
+          <div class="time-stay">1 hr</div>
         </td>
-        <td class="td-place"><span class="place-name">香榭麗舍大道</span><a class="map-link" href="https://maps.google.com/?q=Champs-Élysées+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
-        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge taxi">🚖 計程車</span><span class="trans-time">~10 min</span></div></td>
-        <td class="td-note">最後掃街購物</td>
+        <td class="td-place"><span class="place-name">小皇宮</span><a class="map-link" href="https://maps.google.com/?q=Petit+Palais+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">~10 min</span></div></td>
+        <td class="td-note">賞院內春日櫻花，入場免費</td>
       </tr>
 <tr class="schedule-row alt">
         <td class="td-time">
-          <div class="time-start">18:45</div>
-          <div class="time-end">→ 19:30</div>
-          <div class="time-stay">45 min</div>
+          <div class="time-start">17:00</div>
+          <div class="time-end">→ 18:30</div>
+          <div class="time-stay">1.5 hr</div>
+        </td>
+        <td class="td-place"><span class="place-name">香榭麗舍大道</span><a class="map-link" href="https://maps.google.com/?q=Champs-Élysées+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">~5 min</span></div></td>
+        <td class="td-note">最後掃街購物</td>
+      </tr>
+<tr class="schedule-row">
+        <td class="td-time">
+          <div class="time-start">18:30</div>
+          <div class="time-end">→ 19:00</div>
+          <div class="time-stay">30 min</div>
         </td>
         <td class="td-place"><span class="place-name">凱旋門</span><a class="map-link" href="https://maps.google.com/?q=Arc+de+Triomphe+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
         <td class="td-trans"><div class="trans-wrap"><span class="trans-badge walk">🚶 步行</span><span class="trans-time">10 min</span></div></td>
         <td class="td-note">黃昏登頂視野最佳，提前購票</td>
       </tr>
-<tr class="schedule-row">
+<tr class="schedule-row alt">
         <td class="td-time">
           <div class="time-start">19:30</div>
           <div class="time-end">→ 21:30</div>
@@ -1536,8 +1709,9 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
       <div class="day-label">回程</div>
     </div>
     <div class="day-header-right">
-      <div class="wx-wrap" id="wx-wrap-day-8"></div>
-      <div class="day-summary">
+      <div class="wx-outfit-wrap"><div class="wx-wrap" id="wx-wrap-day-8"></div>
+      <button class="outfit-btn" onclick="openOutfitModal(8)"><span class="outfit-btn-icon">👗</span><span class="outfit-btn-label">今日穿搭</span></button></div>
+      <div class="day-summary"><div class="summary-header"><span class="summary-label-desktop">✦ 今日行程概覽</span></div>
       <div class="summary-text">清晨計程車前往 CDG，完成退稅後<br>
         在免稅區輕鬆候機。搭乘長榮<br>
         BR088 直飛桃園，結束這趟<br>
@@ -1548,17 +1722,9 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
   <div class="summary-mobile" id="summary-mobile-day-8">
     <div class="summary-mobile-toggle" onclick="toggleSummary('day-8')">
       <span class="summary-mobile-label">✦ 今日行程概覽</span>
-      <span class="summary-mobile-arrow">▾</span>
+          <span class="summary-mobile-arrow">▾</span>
     </div>
     <div class="summary-mobile-body">清晨計程車前往 CDG，完成退稅後在免稅區輕鬆候機。搭乘長榮 BR088 直飛桃園，結束這趟充滿美食與藝術的巴黎之旅。</div>
-  </div>
-  <div class="hotel-strip">
-    <span class="hotel-icon">🏨</span>
-    <span class="hotel-label">住宿</span>
-    <span class="hotel-name">台灣 · 回家</span>
-    <a class="hotel-map" href="#" target="_blank">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Google Maps
-    </a>
   </div>
   <div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#E0924A"></div>計程車</div><div class="leg-item"><div class="leg-dot" style="background:#50B8E0"></div>飛機</div></div>
   <div class="table-wrap"><table class="schedule-table">
@@ -2097,7 +2263,7 @@ function closeRestoModal(e) {
   document.body.style.overflow = '';
 }
 
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRestoModal(null); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeRestoModal(null); closeOutfitModal(null); } });
 
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
@@ -2115,6 +2281,257 @@ document.querySelectorAll('.schedule-row').forEach(row => {
     if (!wasSelected) row.classList.add('selected');
   });
 });
+</script>
+
+<!-- ══ OUTFIT MODAL HTML ══ -->
+<div class="outfit-modal-overlay" id="outfitModalOverlay" onclick="closeOutfitModal(event)">
+  <div class="outfit-modal">
+    <div class="outfit-modal-head">
+      <div>
+        <div class="outfit-modal-title" id="outfitModalTitle">穿搭建議</div>
+        <div class="outfit-modal-sub" id="outfitModalSub">3/13 · 出發日</div>
+      </div>
+      <button class="outfit-modal-close" onclick="closeOutfitModal(null)">✕</button>
+    </div>
+    <div class="outfit-gender-tabs">
+      <button class="outfit-gender-tab active" id="outfitTabM" onclick="switchOutfitGender('M')">♂ 男生</button>
+      <button class="outfit-gender-tab" id="outfitTabF" onclick="switchOutfitGender('F')">♀ 女生</button>
+    </div>
+    <div id="outfitModalBody"></div>
+  </div>
+</div>
+
+<script>
+// ── 穿搭資料 ─────────────────────────────────────────────────────────────────
+// 格式：每天有 male / female，各自有 morning / afternoon
+// item value 可為 string 或 {text, style:'highlight'|'highlight-blue'|'dim'}
+
+const OUTFIT_DATA = [
+  // day-0: 3/13 出發日
+  {
+    date: '3/13', label: '出發日', temp: '9–13°C',
+    tips: ['機上久坐，選彈性佳的 traveler 褲最舒適', '飛機冷，外套隨手可取'],
+    male: {
+      morning: null,
+      afternoon: { jacket: '北臉羽絨外套', top: '奶茶素綿長袖', pants: 'traveler', shoes: 'hoka' }
+    },
+    female: {
+      morning: null,
+      afternoon: { jacket: '北臉羽絨衣', top: '淺藍色 咖啡條紋 POLO針織衫', pants: '黑色寬褲', shoes: 'Hoka' }
+    }
+  },
+  // day-1: 3/14 抵達·Cheval Blanc·Plenitude
+  {
+    date: '3/14', label: '抵達 · Plenitude', temp: '9–14°C',
+    tips: ['早晨入住 Cheval Blanc，水療休息調時差，穿輕鬆舒適即可', '晚間 Plenitude 米其林三星，需正式著裝'],
+    male: {
+      morning: { jacket: '北臉羽絨外套', top: '奶茶素綿長袖', pants: 'traveler', shoes: 'hoka' },
+      afternoon: { jacket: '高梧集', top: 'uniqlo白襯衫 衛生衣1', pants: '高梧集西裝褲', shoes: '黏帶皮鞋' }
+    },
+    female: {
+      morning: null,
+      afternoon: {
+        jacket: '黑色羊毛大衣',
+        top: { text: '白色套裝上衣 / agnès b. 白色無袖洋裝', style: 'highlight' },
+        pants: { text: '白色套裝裙子', style: 'highlight' },
+        shoes: 'VIVAIA 瑪莉珍鞋'
+      }
+    }
+  },
+  // day-2: 3/15 羅浮宮
+  {
+    date: '3/15', label: '羅浮宮', temp: '10–17°C',
+    tips: ['羅浮宮館內步行量極大，鞋子舒適度優先', '室內為主，厚外套可寄存或脫下'],
+    male: {
+      morning: { jacket: '北臉羽絨外套', top: '歐都納黑', pants: 'traveler', shoes: 'hoka' },
+      afternoon: { jacket: '北臉羽絨外套', top: '歐都納黑', pants: 'traveler', shoes: 'hoka' }
+    },
+    female: {
+      morning: { jacket: '北臉羽絨衣', top: '淺藍色 圓領針織衫', pants: '黑色修身長褲', shoes: 'Hoka' },
+      afternoon: null
+    }
+  },
+  // day-3: 3/16 左岸·Arpège
+  {
+    date: '3/16', label: '左岸 · Arpège', temp: '6–12°C',
+    tips: ['Arpège 米其林三星，西裝外套全天維持', '樂蓬馬歇百貨逛街，樂福鞋舒適度注意'],
+    male: {
+      morning: { jacket: 'Celine + 棕色西裝', top: '黑素綿長袖 極發熱', pants: '棕上班褲', shoes: '樂福' },
+      afternoon: { jacket: 'Celine + 棕色西裝', top: '黑素綿長袖 極發熱', pants: '棕上班褲', shoes: '樂福' }
+    },
+    female: {
+      morning: {
+        jacket: '黑色羊毛大衣',
+        top: '淺藍色 圓領針織衫',
+        pants: { text: '西裝條紋寬褲 / 深藍色長裙', style: 'highlight-blue' },
+        shoes: '平底短靴 / Hoka → VIVAIA 瑪莉珍鞋'
+      },
+      afternoon: null
+    }
+  },
+  // day-4: 3/17 凡爾賽·Le Cinq
+  {
+    date: '3/17', label: '凡爾賽 · Le Cinq', temp: '6–10°C',
+    tips: ['凡爾賽宮戶外庭園面積廣，早上備好防風', '下午返城換裝 — Le Cinq 四季飯店三星，建議盛裝'],
+    male: {
+      morning: { jacket: '北臉羽絨外套', top: '毛衣 薄發熱', pants: '歐都納', shoes: 'hoka' },
+      afternoon: { jacket: 'Celine + 高梧集', top: 'uniqlo白襯衫 衛生衣2', pants: '高梧集西裝褲', shoes: '黏帶皮鞋' }
+    },
+    female: {
+      morning: { jacket: '北臉羽絨衣', top: '淺藍色 咖啡條紋 POLO針織衫', pants: '黑色修身長褲', shoes: 'Hoka' },
+      afternoon: {
+        jacket: '黑色羊毛大衣',
+        top: { text: '黑色亮片毛衣 / agnès b. 白色無袖洋裝', style: 'highlight' },
+        pants: { text: '白色套裝裙子 / agnès b. 白色無袖洋裝', style: 'highlight' },
+        shoes: 'VIVAIA 瑪莉珍鞋'
+      }
+    }
+  },
+  // day-5: 3/18 布隆尼·Le Pré Catelan
+  {
+    date: '3/18', label: '布隆尼 · Le Pré Catelan', temp: '5–9°C',
+    tips: ['全程最冷的一天，外套保暖為優先', 'Le Pré Catelan 森林三星餐廳，著裝同樣正式'],
+    male: {
+      morning: { jacket: 'Celine + 棕色西裝', top: '黑素綿長袖 極發熱', pants: '棕上班褲', shoes: '樂福' },
+      afternoon: { jacket: 'Celine + 棕色西裝', top: '黑素綿長袖 極發熱', pants: '棕上班褲', shoes: '樂福' }
+    },
+    female: {
+      morning: {
+        jacket: '黑色羊毛大衣',
+        top: '深藍色白條紋 POLO針織衫',
+        pants: { text: '黑色修身長褲 / 深藍色長裙', style: 'highlight-blue' },
+        shoes: '平底短靴'
+      },
+      afternoon: null
+    }
+  },
+  // day-6: 3/19 瑪黑·L'Ambroisie
+  {
+    date: '3/19', label: '瑪黑 · L\'Ambroisie', temp: '6–8°C',
+    tips: ['巴士底市集地面不平，避免高跟鞋', 'L\'Ambroisie 孚日廣場三星，全日西裝維持', '下午巷弄逛街步行多'],
+    male: {
+      morning: { jacket: 'Celine + 高梧集', top: 'uniqlo 藍襯衫 衛生衣3', pants: '厚上班褲', shoes: '黏帶皮鞋' },
+      afternoon: { jacket: 'Celine + 高梧集', top: 'uniqlo 藍襯衫 衛生衣3', pants: '厚上班褲', shoes: '黏帶皮鞋' }
+    },
+    female: {
+      morning: {
+        jacket: '黑色羊毛大衣',
+        top: { text: '白色套裝上衣 / 藍綠色毛衣', style: 'highlight' },
+        pants: '西裝條紋寬褲',
+        shoes: 'Hoka → 穆勒鞋'
+      },
+      afternoon: null
+    }
+  },
+  // day-7: 3/20 最後一天·Kei
+  {
+    date: '3/20', label: '最後一天 · Kei', temp: '4–6°C',
+    tips: ['全程最低溫，注意保暖層次', 'Kei 日法三星午餐，西裝全天維持', '小皇宮賞櫻戶外，風大備好外套', '凱旋門登頂山風強，需防風'],
+    male: {
+      morning: { jacket: 'Celine + 棕色西裝', top: 'uniqlo黑襯衫 黑喀發熱', pants: '棕上班褲', shoes: '樂福' },
+      afternoon: { jacket: 'Celine + 棕色西裝', top: 'uniqlo黑襯衫 黑喀發熱', pants: '棕上班褲', shoes: '樂福' }
+    },
+    female: {
+      morning: {
+        jacket: '黑色羊毛大衣、agnès b. 珍珠扣開衫',
+        top: '淺藍色 圓領針織衫',
+        pants: { text: '深藍色長裙', style: 'highlight-blue' },
+        shoes: '平底短靴 → 穆勒鞋'
+      },
+      afternoon: null
+    }
+  },
+  // day-8: 3/21 回程
+  {
+    date: '3/21', label: '回程', temp: '9–20°C',
+    tips: ['機場長途行走，舒適為主', '過海關時外套、皮帶需取下，簡單穿搭省事', '桃園抵達氣溫偏高，注意不要穿太厚'],
+    male: {
+      morning: { jacket: '北臉羽絨外套', top: '藕色素綿長袖', pants: '歐都納', shoes: 'hoka' },
+      afternoon: null
+    },
+    female: {
+      morning: { jacket: '北臉羽絨衣', top: '舒適棉T', pants: '黑色寬褲', shoes: 'Hoka' },
+      afternoon: null
+    }
+  }
+];
+
+let outfitCurrentDay = 0;
+let outfitCurrentGender = 'M';
+
+function openOutfitModal(dayIndex) {
+  outfitCurrentDay = dayIndex;
+  outfitCurrentGender = 'M';
+  document.getElementById('outfitTabM').classList.add('active');
+  document.getElementById('outfitTabF').classList.remove('active');
+  renderOutfitModal();
+  document.getElementById('outfitModalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeOutfitModal(e) {
+  if (e && e.target !== document.getElementById('outfitModalOverlay')) return;
+  document.getElementById('outfitModalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function switchOutfitGender(g) {
+  outfitCurrentGender = g;
+  document.getElementById('outfitTabM').classList.toggle('active', g === 'M');
+  document.getElementById('outfitTabF').classList.toggle('active', g === 'F');
+  renderOutfitModal();
+}
+
+function renderOutfitModal() {
+  const d = OUTFIT_DATA[outfitCurrentDay];
+  document.getElementById('outfitModalTitle').textContent = d.date + ' · ' + d.label;
+  document.getElementById('outfitModalSub').textContent = outfitCurrentGender === 'M' ? '♂ 男生穿搭' : '♀ 女生穿搭';
+
+  const src = outfitCurrentGender === 'M' ? d.male : d.female;
+  const labels = { jacket: '外套', top: '上衣', pants: '褲 / 裙', shoes: '鞋子' };
+
+  function renderSection(title, data) {
+    if (!data) return '';
+    let rows = '';
+    for (const [key, val] of Object.entries(data)) {
+      const lbl = labels[key] || key;
+      let valueHtml = '';
+      if (typeof val === 'string') {
+        valueHtml = `<div class="outfit-value">${val}</div>`;
+      } else if (val && typeof val === 'object') {
+        const cls = val.style ? ` ${val.style}` : '';
+        valueHtml = `<div class="outfit-value${cls}">${val.text}</div>`;
+      }
+      rows += `<div class="outfit-row"><div class="outfit-label">${lbl}</div>${valueHtml}</div>`;
+    }
+    return `<div class="outfit-section">
+      <div class="outfit-section-title">${title}</div>
+      ${rows}
+    </div>`;
+  }
+
+  let html = `<div class="outfit-wx-note">🌡 當日氣溫 <span class="temp">${d.temp}</span></div>`;
+
+  // Tips
+  if (d.tips && d.tips.length) {
+    const items = d.tips.map(t => `<li>${t}</li>`).join('');
+    html += `<div class="outfit-tips"><div class="outfit-tips-label">✦ 行程考量</div><ul class="outfit-tips-list">${items}</ul></div>`;
+  }
+
+  const hasMorning = src.morning !== null;
+  const hasAfternoon = src.afternoon !== null;
+
+  if (!hasMorning && !hasAfternoon) {
+    html += `<div class="outfit-empty">此時段暫無穿搭建議</div>`;
+  } else if (hasMorning && hasAfternoon) {
+    html += renderSection('早上', src.morning);
+    html += renderSection('下午 / 晚間', src.afternoon);
+  } else {
+    html += renderSection('全日', src.morning || src.afternoon);
+  }
+
+  document.getElementById('outfitModalBody').innerHTML = html;
+}
 </script>
 </body>
 </html>
