@@ -2536,22 +2536,22 @@ function outfitStorageKey(dayIdx) {
   return `outfit:day-${dayIdx}`;
 }
 
-async function loadOutfitOverrides(dayIdx) {
+function loadOutfitOverrides(dayIdx) {
   try {
-    const r = await window.storage.get(outfitStorageKey(dayIdx));
-    return r ? JSON.parse(r.value) : {};
+    const val = localStorage.getItem(outfitStorageKey(dayIdx));
+    return val ? JSON.parse(val) : {};
   } catch(e) { return {}; }
 }
 
-async function saveOutfitOverrides(dayIdx, overrides) {
+function saveOutfitOverrides(dayIdx, overrides) {
   try {
-    await window.storage.set(outfitStorageKey(dayIdx), JSON.stringify(overrides));
+    localStorage.setItem(outfitStorageKey(dayIdx), JSON.stringify(overrides));
   } catch(e) { console.warn('outfit save failed', e); }
 }
 
-async function resetOutfitDay() {
+function resetOutfitDay() {
   try {
-    await window.storage.delete(outfitStorageKey(outfitCurrentDay));
+    localStorage.removeItem(outfitStorageKey(outfitCurrentDay));
   } catch(e) {}
   outfitOverridesCache = {};
   showSaveHint('已重設為預設穿搭', false);
@@ -2574,13 +2574,12 @@ function showSaveHint(msg, isSaved = true) {
 let outfitOverridesCache = {};
 
 // ── Modal open/close ─────────────────────────────────────────────────────────
-async function openOutfitModal(dayIndex) {
+function openOutfitModal(dayIndex) {
   outfitCurrentDay = dayIndex;
   outfitCurrentGender = 'M';
   document.getElementById('outfitTabM').classList.add('active');
   document.getElementById('outfitTabF').classList.remove('active');
-  // 先讀好資料，再顯示 modal
-  outfitOverridesCache = await loadOutfitOverrides(dayIndex);
+  outfitOverridesCache = loadOutfitOverrides(dayIndex);
   renderOutfitModal();
   document.getElementById('outfitModalOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -2698,7 +2697,7 @@ function renderOutfitModal() {
 
   // 綁定 contenteditable blur 事件
   document.querySelectorAll('#outfitModalBody [contenteditable]').forEach(el => {
-    el.addEventListener('blur', async () => {
+    el.addEventListener('blur', () => {
       const section = el.dataset.section;
       const key = el.dataset.key;
       const orig = el.dataset.orig;
@@ -2708,7 +2707,7 @@ function renderOutfitModal() {
       } else {
         outfitOverridesCache[`${section}:${key}`] = newVal;
       }
-      await saveOutfitOverrides(outfitCurrentDay, outfitOverridesCache);
+      saveOutfitOverrides(outfitCurrentDay, outfitOverridesCache);
       if (newVal !== orig) {
         el.classList.add('edited');
       } else {
