@@ -1825,7 +1825,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
   var HOURS = ['06','09','12','15','18','21','00','03'];
   var WMO_ICON = {0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',71:'🌨️',73:'🌨️',75:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',95:'⛈️',96:'⛈️',99:'⛈️'};
   var WMO_DESC = {0:'晴',1:'多雲間晴',2:'局部多雲',3:'陰天',45:'霧',48:'霧',51:'毛毛雨',53:'毛毛雨',55:'細雨',61:'小雨',63:'中雨',65:'大雨',71:'小雪',73:'中雪',75:'大雪',80:'陣雨',81:'陣雨',82:'大雨',95:'雷雨',96:'雷雨',99:'強雷雨'};
-  var HIST_FALLBACK = {
+  window.HIST_FALLBACK = {
     'day-0':{ tmax:13, tmin:5,  rain:20, code:2,  temps:[6,7,10,12,13,12,10,7],  rains:[15,15,20,18,15,10,8,5]  },
     'day-1':{ tmax:11, tmin:4,  rain:60, code:61, temps:[5,6,8,10,11,10,8,6],    rains:[40,50,60,58,50,40,30,20] },
     'day-2':{ tmax:10, tmin:3,  rain:40, code:80, temps:[4,5,8,10,10,9,7,5],     rains:[25,35,40,38,30,25,15,10] },
@@ -1919,7 +1919,10 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
     }
   }
 
+  window.WX_LIVE = {}; // 儲存各天實際氣象資料供穿搭 modal 使用
+
   function buildWidget(dayId, d, label) {
+    window.WX_LIVE[dayId] = { tmax: d.tmax, tmin: d.tmin }; // 存入全域
     var wrap = document.getElementById('wx-wrap-'+dayId);
     if (!wrap) return;
     var icon = WMO_ICON[d.code] || '🌡️';
@@ -1934,7 +1937,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
     var html = '';
     html += '<button class="wx-btn" data-wx-id="'+dayId+'" onclick="toggleWx(\''+dayId+'\')">';
     html += '<span class="wx-btn-icon">'+icon+'</span>';
-    html += '<span class="wx-btn-temp">'+d.tmax+'° / '+d.tmin+'°</span>';
+    html += '<span class="wx-btn-temp">'+d.tmin+'° – '+d.tmax+'°</span>';
     html += '<span class="wx-btn-desc">'+desc+'</span>';
     html += '<span class="wx-btn-arrow">▾</span>';
     html += '</button>';
@@ -1981,7 +1984,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
   // 先用 hardcoded fallback 渲染
   for (var i=0; i<DAYS.length; i++) {
     var day = DAYS[i];
-    var fb = HIST_FALLBACK[day.id];
+    var fb = window.HIST_FALLBACK[day.id];
     if (fb) buildWidget(day.id, fb, '去年同期參考資料');
   }
 
@@ -2510,11 +2513,34 @@ function renderOutfitModal() {
     </div>`;
   }
 
-  let html = `<div class="outfit-wx-note">🌡 當日氣溫 <span class="temp">${d.temp}</span></div>`;
+  // 讀取氣象資料（優先用即時資料，fallback 用 HIST_FALLBACK）
+  const dayId = 'day-' + outfitCurrentDay;
+  const wx = (window.WX_LIVE && window.WX_LIVE[dayId])
+    ? window.WX_LIVE[dayId]
+    : (window.HIST_FALLBACK && window.HIST_FALLBACK[dayId])
+      ? window.HIST_FALLBACK[dayId]
+      : null;
+  const tmax = wx ? wx.tmax : null;
+  const tmin = wx ? wx.tmin : null;
+  const tempStr = (tmax !== null && tmin !== null) ? `${tmin}° – ${tmax}°C` : d.temp;
 
-  // Tips
-  if (d.tips && d.tips.length) {
-    const items = d.tips.map(t => `<li>${t}</li>`).join('');
+  // 根據實際氣溫動態補充行程考量備註
+  function buildTips(baseTips, tmax, tmin) {
+    const tips = [...baseTips];
+    if (tmax === null) return tips;
+    if (tmax <= 6)  tips.push(`今日最高僅 ${tmax}°C，建議多層次穿搭，隨時可加減`);
+    else if (tmax <= 10) tips.push(`氣溫偏涼（最高 ${tmax}°C），外套全天必備`);
+    else if (tmax >= 17) tips.push(`最高可達 ${tmax}°C，室內可能偏熱，注意穿搭透氣性`);
+    if (tmin <= 4)  tips.push(`清晨最低 ${tmin}°C，出門前務必保暖`);
+    return tips;
+  }
+
+  const tips = buildTips(d.tips || [], tmax, tmin);
+
+  let html = `<div class="outfit-wx-note">🌡 當日氣溫 <span class="temp">${tempStr}</span></div>`;
+
+  if (tips.length) {
+    const items = tips.map(t => `<li>${t}</li>`).join('');
     html += `<div class="outfit-tips"><div class="outfit-tips-label">✦ 行程考量</div><ul class="outfit-tips-list">${items}</ul></div>`;
   }
 
