@@ -372,7 +372,9 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
 .wx-btn.open  { border-color: var(--gold-dim); background: #141210; border-bottom-color: transparent; border-radius: 4px 4px 0 0; }
 .wx-btn-icon  { font-size: 18px; line-height: 1; }
 .wx-btn-temp  { font-size: 12px; color: var(--gold); font-weight: 500; letter-spacing: 0.04em; }
+.wx-btn-desc-row { display: flex; align-items: center; gap: 5px; margin-top: 1px; }
 .wx-btn-desc  { font-size: 9.5px; color: var(--dim); letter-spacing: 0.1em; text-transform: uppercase; }
+.wx-btn-source-emoji { font-size: 9px; line-height: 1; }
 .wx-btn-arrow { font-size: 9px; color: var(--gold-dim); margin-left: 2px; transition: transform .2s; }
 .wx-btn.open .wx-btn-arrow { transform: rotate(180deg); }
 
@@ -719,6 +721,55 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
   padding: 28px 20px; text-align: center;
   font-size: 11px; color: #3A3A3A; letter-spacing: 0.12em; font-style: italic;
 }
+
+/* ── 可編輯欄位 ── */
+.outfit-value[contenteditable="true"] {
+  outline: none;
+  border-bottom: 1px dashed var(--gold-dim);
+  cursor: text;
+  min-width: 60px;
+  display: inline-block;
+  transition: border-color .15s, background .15s;
+  border-radius: 2px;
+  padding: 1px 4px;
+  margin: -1px -4px;
+}
+.outfit-value[contenteditable="true"]:hover {
+  border-bottom-color: var(--gold);
+  background: rgba(200,169,110,0.06);
+}
+.outfit-value[contenteditable="true"]:focus {
+  border-bottom-color: var(--gold);
+  background: rgba(200,169,110,0.10);
+}
+.outfit-value.edited::after {
+  content: ' ✎';
+  font-size: 9px;
+  color: var(--gold-dim);
+  opacity: 0.7;
+}
+
+/* ── modal footer：重設按鈕 ── */
+.outfit-modal-footer {
+  padding: 10px 20px 16px;
+  border-top: 1px solid #1A1A1A;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.outfit-save-hint {
+  font-size: 9.5px; color: var(--dim); letter-spacing: 0.1em;
+}
+.outfit-save-hint.saved { color: #5DBE8A; transition: color .3s; }
+.outfit-reset-btn {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--dim); background: none; border: 1px solid #2A2A2A;
+  border-radius: 3px; padding: 4px 12px; cursor: pointer;
+  transition: all .15s;
+}
+.outfit-reset-btn:hover { color: #E07070; border-color: #5A2A2A; background: rgba(200,80,80,0.07); }
 
 /* weather note in modal */
 .outfit-wx-note {
@@ -1840,25 +1891,39 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
   function parseDaily(data, dateKey) {
     var di = data.daily.time.indexOf(dateKey);
     if (di === -1) return null;
+
+    // hourly: 支援 T00:00 和 T00:00:00 兩種格式
     var ds = data.hourly.time.indexOf(dateKey + 'T00:00');
-    if (ds === -1) return null;
+    if (ds === -1) ds = data.hourly.time.indexOf(dateKey + 'T00:00:00');
+
     var offsets = [6,9,12,15,18,21,24,27];
-    var temps = offsets.map(function(o) {
-      var v = data.hourly.temperature_2m[ds+o];
-      return (v != null) ? Math.round(v) : null;
-    });
-    var rains = offsets.map(function(o) {
-      var v = data.hourly.precipitation_probability ? data.hourly.precipitation_probability[ds+o] : null;
-      return (v != null) ? v : 0;
-    });
-    for (var i=0; i<temps.length; i++) {
-      if (temps[i] == null) temps[i] = i > 0 ? temps[i-1] : 10;
+    var temps, rains;
+
+    if (ds !== -1) {
+      temps = offsets.map(function(o) {
+        var v = data.hourly.temperature_2m[ds+o];
+        return (v != null) ? Math.round(v) : null;
+      });
+      rains = offsets.map(function(o) {
+        var v = data.hourly.precipitation_probability ? data.hourly.precipitation_probability[ds+o] : null;
+        return (v != null) ? v : 0;
+      });
+      for (var i=0; i<temps.length; i++) {
+        if (temps[i] == null) temps[i] = i > 0 ? temps[i-1] : 10;
+      }
+    } else {
+      // hourly 缺失：用 daily 最高最低插值
+      var tmax0 = Math.round(data.daily.temperature_2m_max[di]);
+      var tmin0 = Math.round(data.daily.temperature_2m_min[di]);
+      temps = [tmin0, tmin0, Math.round((tmin0+tmax0)/2), tmax0, tmax0, Math.round((tmin0+tmax0)/2), tmin0, tmin0];
+      rains = [0,0,0,0,0,0,0,0];
     }
+
     var code = (data.daily.weather_code && data.daily.weather_code[di] != null)
       ? data.daily.weather_code[di]
       : (data.daily.weathercode ? data.daily.weathercode[di] : 1);
     var rainMax = data.daily.precipitation_probability_max
-      ? data.daily.precipitation_probability_max[di]
+      ? (data.daily.precipitation_probability_max[di] || 0)
       : Math.max.apply(null, rains);
     return {
       tmax: Math.round(data.daily.temperature_2m_max[di]),
@@ -1935,10 +2000,11 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
     for (var i=0; i<HOURS.length; i++) xaxis += '<span>'+HOURS[i]+':00</span>';
 
     var html = '';
+    var sourceEmoji = label ? '📅' : '📡';
     html += '<button class="wx-btn" data-wx-id="'+dayId+'" onclick="toggleWx(\''+dayId+'\')">';
     html += '<span class="wx-btn-icon">'+icon+'</span>';
-    html += '<span class="wx-btn-temp">'+d.tmin+'° – '+d.tmax+'°</span>';
-    html += '<span class="wx-btn-desc">'+desc+'</span>';
+    html += '<div><span class="wx-btn-temp">'+d.tmin+'° – '+d.tmax+'°</span>';
+    html += '<div class="wx-btn-desc-row"><span class="wx-btn-desc">'+desc+'</span><span class="wx-btn-source-emoji">'+sourceEmoji+'</span></div></div>';
     html += '<span class="wx-btn-arrow">▾</span>';
     html += '</button>';
     html += '<div class="wx-panel" id="wxp-'+dayId+'">';
@@ -1981,46 +2047,45 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
     return false;
   }
 
-  // 先用 hardcoded fallback 渲染
-  for (var i=0; i<DAYS.length; i++) {
-    var day = DAYS[i];
-    var fb = window.HIST_FALLBACK[day.id];
-    if (fb) buildWidget(day.id, fb, '去年同期參考資料');
+  // 先用 hardcoded fallback 渲染，避免白畫面
+  for (var i = 0; i < DAYS.length; i++) {
+    var fb = window.HIST_FALLBACK[DAYS[i].id];
+    if (fb) buildWidget(DAYS[i].id, fb, '去年同期參考資料');
   }
 
-  // 非同步更新：歷史 API → 預報 API
+  // 並行抓取預報 + 歷史，有預報優先，沒有才用歷史
   (async function() {
-    try {
-      var hUrl = 'https://archive-api.open-meteo.com/v1/archive?latitude=48.8566&longitude=2.3522'
-        +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max'
-        +'&hourly=temperature_2m,precipitation_probability'
-        +'&timezone=Europe%2FParis&start_date=2025-03-13&end_date=2025-03-21';
-      var hr = await fetch(hUrl);
-      if (hr.ok) {
-        var hj = await hr.json();
-        if (!hj.error) {
-          for (var i=0; i<DAYS.length; i++) {
-            applyData(hj, DAYS[i].hist, DAYS[i].id, '去年同期參考資料');
-          }
-        }
-      }
-    } catch(e) { /* 靜默，已有 fallback */ }
+    var fUrl = 'https://api.open-meteo.com/v1/forecast?latitude=48.8566&longitude=2.3522'
+      + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max'
+      + '&hourly=temperature_2m,precipitation_probability'
+      + '&timezone=Europe%2FParis&forecast_days=16';
+    var hUrl = 'https://archive-api.open-meteo.com/v1/archive?latitude=48.8566&longitude=2.3522'
+      + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max'
+      + '&hourly=temperature_2m,precipitation_probability'
+      + '&timezone=Europe%2FParis&start_date=2025-03-13&end_date=2025-03-21';
+    var results = await Promise.allSettled([
+      fetch(fUrl).then(function(r) { return r.ok ? r.json() : null; }).catch(function() { return null; }),
+      fetch(hUrl).then(function(r) { return r.ok ? r.json() : null; }).catch(function() { return null; })
+    ]);
 
-    try {
-      var fUrl = 'https://api.open-meteo.com/v1/forecast?latitude=48.8566&longitude=2.3522'
-        +'&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max'
-        +'&hourly=temperature_2m,precipitation_probability'
-        +'&timezone=Europe%2FParis&forecast_days=16';
-      var fr = await fetch(fUrl);
-      if (fr.ok) {
-        var fj = await fr.json();
-        if (!fj.error) {
-          for (var i=0; i<DAYS.length; i++) {
-            applyData(fj, DAYS[i].date, DAYS[i].id, null);
-          }
-        }
+    var fj = results[0].status === 'fulfilled' && results[0].value && !results[0].value.error ? results[0].value : null;
+    var hj = results[1].status === 'fulfilled' && results[1].value && !results[1].value.error ? results[1].value : null;
+
+    // Debug
+    if (fj) {
+      var fdates = fj.daily && fj.daily.time;
+      var fhours = fj.hourly && fj.hourly.time;
+      } else {
+    }
+
+    // 逐天判斷：有即時預報用預報，沒有才 fallback 歷史 API
+    for (var i = 0; i < DAYS.length; i++) {
+      var day = DAYS[i];
+      var gotForecast = fj && applyData(fj, day.date, day.id, null);
+      if (!gotForecast) {
+        hj && applyData(hj, day.hist, day.id, '去年同期參考資料');
       }
-    } catch(e) { /* 靜默 */ }
+    }
   })();
 })();
 // ── END WEATHER ───────────────────────────────────────────────────────────
@@ -2301,6 +2366,10 @@ document.querySelectorAll('.schedule-row').forEach(row => {
       <button class="outfit-gender-tab" id="outfitTabF" onclick="switchOutfitGender('F')">♀ 女生</button>
     </div>
     <div id="outfitModalBody"></div>
+    <div class="outfit-modal-footer">
+      <span class="outfit-save-hint" id="outfitSaveHint">點擊文字即可編輯，自動儲存</span>
+      <button class="outfit-reset-btn" onclick="resetOutfitDay()">重設今日</button>
+    </div>
   </div>
 </div>
 
@@ -2462,11 +2531,56 @@ const OUTFIT_DATA = [
 let outfitCurrentDay = 0;
 let outfitCurrentGender = 'M';
 
-function openOutfitModal(dayIndex) {
+// ── Storage helpers ──────────────────────────────────────────────────────────
+function outfitStorageKey(dayIdx) {
+  return `outfit:day-${dayIdx}`;
+}
+
+async function loadOutfitOverrides(dayIdx) {
+  try {
+    const r = await window.storage.get(outfitStorageKey(dayIdx));
+    return r ? JSON.parse(r.value) : {};
+  } catch(e) { return {}; }
+}
+
+async function saveOutfitOverrides(dayIdx, overrides) {
+  try {
+    await window.storage.set(outfitStorageKey(dayIdx), JSON.stringify(overrides));
+  } catch(e) { console.warn('outfit save failed', e); }
+}
+
+async function resetOutfitDay() {
+  try {
+    await window.storage.delete(outfitStorageKey(outfitCurrentDay));
+  } catch(e) {}
+  outfitOverridesCache = {};
+  showSaveHint('已重設為預設穿搭', false);
+  renderOutfitModal();
+}
+
+function showSaveHint(msg, isSaved = true) {
+  const el = document.getElementById('outfitSaveHint');
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.toggle('saved', isSaved);
+  clearTimeout(el._t);
+  el._t = setTimeout(() => {
+    el.textContent = '點擊文字即可編輯，自動儲存';
+    el.classList.remove('saved');
+  }, 2000);
+}
+
+// ── Override 快取（避免重複讀取） ───────────────────────────────────────────
+let outfitOverridesCache = {};
+
+// ── Modal open/close ─────────────────────────────────────────────────────────
+async function openOutfitModal(dayIndex) {
   outfitCurrentDay = dayIndex;
   outfitCurrentGender = 'M';
   document.getElementById('outfitTabM').classList.add('active');
   document.getElementById('outfitTabF').classList.remove('active');
+  // 先讀好資料，再顯示 modal
+  outfitOverridesCache = await loadOutfitOverrides(dayIndex);
   renderOutfitModal();
   document.getElementById('outfitModalOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -2482,30 +2596,55 @@ function switchOutfitGender(g) {
   outfitCurrentGender = g;
   document.getElementById('outfitTabM').classList.toggle('active', g === 'M');
   document.getElementById('outfitTabF').classList.toggle('active', g === 'F');
-  renderOutfitModal();
+  renderOutfitModal(); // 切換性別不需重讀 storage
 }
 
+// ── Render ───────────────────────────────────────────────────────────────────
 function renderOutfitModal() {
   const d = OUTFIT_DATA[outfitCurrentDay];
   document.getElementById('outfitModalTitle').textContent = d.date + ' · ' + d.label;
   document.getElementById('outfitModalSub').textContent = outfitCurrentGender === 'M' ? '♂ 男生穿搭' : '♀ 女生穿搭';
 
+  const overrides = outfitOverridesCache;
   const src = outfitCurrentGender === 'M' ? d.male : d.female;
   const labels = { jacket: '外套', top: '上衣', pants: '褲 / 裙', shoes: '鞋子' };
 
-  function renderSection(title, data) {
+  function getVal(section, key, defaultVal) {
+    const overrideKey = `${section}:${key}`;
+    return overrides[overrideKey] !== undefined ? overrides[overrideKey] : defaultVal;
+  }
+
+  function defaultText(val) {
+    if (typeof val === 'string') return val;
+    if (val && typeof val === 'object') return val.text;
+    return '';
+  }
+
+  function defaultStyle(val) {
+    if (val && typeof val === 'object' && val.style) return val.style;
+    return '';
+  }
+
+  function renderSection(title, sectionKey, data) {
     if (!data) return '';
     let rows = '';
     for (const [key, val] of Object.entries(data)) {
       const lbl = labels[key] || key;
-      let valueHtml = '';
-      if (typeof val === 'string') {
-        valueHtml = `<div class="outfit-value">${val}</div>`;
-      } else if (val && typeof val === 'object') {
-        const cls = val.style ? ` ${val.style}` : '';
-        valueHtml = `<div class="outfit-value${cls}">${val.text}</div>`;
-      }
-      rows += `<div class="outfit-row"><div class="outfit-label">${lbl}</div>${valueHtml}</div>`;
+      const origText = defaultText(val);
+      const style = defaultStyle(val);
+      const currentText = getVal(sectionKey, key, origText);
+      const isEdited = overrides[`${sectionKey}:${key}`] !== undefined
+                    && overrides[`${sectionKey}:${key}`] !== origText;
+      const cls = `outfit-value${style ? ' ' + style : ''}${isEdited ? ' edited' : ''}`;
+      rows += `<div class="outfit-row">
+        <div class="outfit-label">${lbl}</div>
+        <div class="${cls}"
+          contenteditable="true"
+          data-section="${sectionKey}"
+          data-key="${key}"
+          data-orig="${origText.replace(/"/g, '&quot;')}"
+          spellcheck="false">${currentText}</div>
+      </div>`;
     }
     return `<div class="outfit-section">
       <div class="outfit-section-title">${title}</div>
@@ -2513,7 +2652,7 @@ function renderOutfitModal() {
     </div>`;
   }
 
-  // 讀取氣象資料（優先用即時資料，fallback 用 HIST_FALLBACK）
+  // 氣象
   const dayId = 'day-' + outfitCurrentDay;
   const wx = (window.WX_LIVE && window.WX_LIVE[dayId])
     ? window.WX_LIVE[dayId]
@@ -2524,21 +2663,19 @@ function renderOutfitModal() {
   const tmin = wx ? wx.tmin : null;
   const tempStr = (tmax !== null && tmin !== null) ? `${tmin}° – ${tmax}°C` : d.temp;
 
-  // 根據實際氣溫動態補充行程考量備註
   function buildTips(baseTips, tmax, tmin) {
     const tips = [...baseTips];
     if (tmax === null) return tips;
-    if (tmax <= 6)  tips.push(`今日最高僅 ${tmax}°C，建議多層次穿搭，隨時可加減`);
+    if (tmax <= 6)       tips.push(`今日最高僅 ${tmax}°C，建議多層次穿搭，隨時可加減`);
     else if (tmax <= 10) tips.push(`氣溫偏涼（最高 ${tmax}°C），外套全天必備`);
     else if (tmax >= 17) tips.push(`最高可達 ${tmax}°C，室內可能偏熱，注意穿搭透氣性`);
-    if (tmin <= 4)  tips.push(`清晨最低 ${tmin}°C，出門前務必保暖`);
+    if (tmin !== null && tmin <= 4) tips.push(`清晨最低 ${tmin}°C，出門前務必保暖`);
     return tips;
   }
 
   const tips = buildTips(d.tips || [], tmax, tmin);
 
   let html = `<div class="outfit-wx-note">🌡 當日氣溫 <span class="temp">${tempStr}</span></div>`;
-
   if (tips.length) {
     const items = tips.map(t => `<li>${t}</li>`).join('');
     html += `<div class="outfit-tips"><div class="outfit-tips-label">✦ 行程考量</div><ul class="outfit-tips-list">${items}</ul></div>`;
@@ -2550,13 +2687,40 @@ function renderOutfitModal() {
   if (!hasMorning && !hasAfternoon) {
     html += `<div class="outfit-empty">此時段暫無穿搭建議</div>`;
   } else if (hasMorning && hasAfternoon) {
-    html += renderSection('早上', src.morning);
-    html += renderSection('下午 / 晚間', src.afternoon);
+    html += renderSection('早上', 'morning', src.morning);
+    html += renderSection('下午 / 晚間', 'afternoon', src.afternoon);
   } else {
-    html += renderSection('全日', src.morning || src.afternoon);
+    const sectionKey = hasMorning ? 'morning' : 'afternoon';
+    html += renderSection('全日', sectionKey, src.morning || src.afternoon);
   }
 
   document.getElementById('outfitModalBody').innerHTML = html;
+
+  // 綁定 contenteditable blur 事件
+  document.querySelectorAll('#outfitModalBody [contenteditable]').forEach(el => {
+    el.addEventListener('blur', async () => {
+      const section = el.dataset.section;
+      const key = el.dataset.key;
+      const orig = el.dataset.orig;
+      const newVal = el.textContent.trim();
+      if (newVal === orig) {
+        delete outfitOverridesCache[`${section}:${key}`];
+      } else {
+        outfitOverridesCache[`${section}:${key}`] = newVal;
+      }
+      await saveOutfitOverrides(outfitCurrentDay, outfitOverridesCache);
+      if (newVal !== orig) {
+        el.classList.add('edited');
+      } else {
+        el.classList.remove('edited');
+      }
+      showSaveHint('已儲存 ✓');
+    });
+    // Enter 鍵完成編輯
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
+    });
+  });
 }
 </script>
 </body>
