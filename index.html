@@ -722,54 +722,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
   font-size: 11px; color: #3A3A3A; letter-spacing: 0.12em; font-style: italic;
 }
 
-/* ── 可編輯欄位 ── */
-.outfit-value[contenteditable="true"] {
-  outline: none;
-  border-bottom: 1px dashed var(--gold-dim);
-  cursor: text;
-  min-width: 60px;
-  display: inline-block;
-  transition: border-color .15s, background .15s;
-  border-radius: 2px;
-  padding: 1px 4px;
-  margin: -1px -4px;
-}
-.outfit-value[contenteditable="true"]:hover {
-  border-bottom-color: var(--gold);
-  background: rgba(200,169,110,0.06);
-}
-.outfit-value[contenteditable="true"]:focus {
-  border-bottom-color: var(--gold);
-  background: rgba(200,169,110,0.10);
-}
-.outfit-value.edited::after {
-  content: ' ✎';
-  font-size: 9px;
-  color: var(--gold-dim);
-  opacity: 0.7;
-}
 
-/* ── modal footer：重設按鈕 ── */
-.outfit-modal-footer {
-  padding: 10px 20px 16px;
-  border-top: 1px solid #1A1A1A;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.outfit-save-hint {
-  font-size: 9.5px; color: var(--dim); letter-spacing: 0.1em;
-}
-.outfit-save-hint.saved { color: #5DBE8A; transition: color .3s; }
-.outfit-reset-btn {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--dim); background: none; border: 1px solid #2A2A2A;
-  border-radius: 3px; padding: 4px 12px; cursor: pointer;
-  transition: all .15s;
-}
-.outfit-reset-btn:hover { color: #E07070; border-color: #5A2A2A; background: rgba(200,80,80,0.07); }
 
 /* weather note in modal */
 .outfit-wx-note {
@@ -2366,10 +2319,6 @@ document.querySelectorAll('.schedule-row').forEach(row => {
       <button class="outfit-gender-tab" id="outfitTabF" onclick="switchOutfitGender('F')">♀ 女生</button>
     </div>
     <div id="outfitModalBody"></div>
-    <div class="outfit-modal-footer">
-      <span class="outfit-save-hint" id="outfitSaveHint">點擊文字即可編輯，自動儲存</span>
-      <button class="outfit-reset-btn" onclick="resetOutfitDay()">重設今日</button>
-    </div>
   </div>
 </div>
 
@@ -2531,47 +2480,7 @@ const OUTFIT_DATA = [
 let outfitCurrentDay = 0;
 let outfitCurrentGender = 'M';
 
-// ── Storage helpers ──────────────────────────────────────────────────────────
-function outfitStorageKey(dayIdx) {
-  return `outfit:day-${dayIdx}`;
-}
 
-function loadOutfitOverrides(dayIdx) {
-  try {
-    const val = localStorage.getItem(outfitStorageKey(dayIdx));
-    return val ? JSON.parse(val) : {};
-  } catch(e) { return {}; }
-}
-
-function saveOutfitOverrides(dayIdx, overrides) {
-  try {
-    localStorage.setItem(outfitStorageKey(dayIdx), JSON.stringify(overrides));
-  } catch(e) { console.warn('outfit save failed', e); }
-}
-
-function resetOutfitDay() {
-  try {
-    localStorage.removeItem(outfitStorageKey(outfitCurrentDay));
-  } catch(e) {}
-  outfitOverridesCache = {};
-  showSaveHint('已重設為預設穿搭', false);
-  renderOutfitModal();
-}
-
-function showSaveHint(msg, isSaved = true) {
-  const el = document.getElementById('outfitSaveHint');
-  if (!el) return;
-  el.textContent = msg;
-  el.classList.toggle('saved', isSaved);
-  clearTimeout(el._t);
-  el._t = setTimeout(() => {
-    el.textContent = '點擊文字即可編輯，自動儲存';
-    el.classList.remove('saved');
-  }, 2000);
-}
-
-// ── Override 快取（避免重複讀取） ───────────────────────────────────────────
-let outfitOverridesCache = {};
 
 // ── Modal open/close ─────────────────────────────────────────────────────────
 function openOutfitModal(dayIndex) {
@@ -2579,7 +2488,6 @@ function openOutfitModal(dayIndex) {
   outfitCurrentGender = 'M';
   document.getElementById('outfitTabM').classList.add('active');
   document.getElementById('outfitTabF').classList.remove('active');
-  outfitOverridesCache = loadOutfitOverrides(dayIndex);
   renderOutfitModal();
   document.getElementById('outfitModalOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -2604,14 +2512,8 @@ function renderOutfitModal() {
   document.getElementById('outfitModalTitle').textContent = d.date + ' · ' + d.label;
   document.getElementById('outfitModalSub').textContent = outfitCurrentGender === 'M' ? '♂ 男生穿搭' : '♀ 女生穿搭';
 
-  const overrides = outfitOverridesCache;
   const src = outfitCurrentGender === 'M' ? d.male : d.female;
   const labels = { jacket: '外套', top: '上衣', pants: '褲 / 裙', shoes: '鞋子' };
-
-  function getVal(section, key, defaultVal) {
-    const overrideKey = `${section}:${key}`;
-    return overrides[overrideKey] !== undefined ? overrides[overrideKey] : defaultVal;
-  }
 
   function defaultText(val) {
     if (typeof val === 'string') return val;
@@ -2624,25 +2526,17 @@ function renderOutfitModal() {
     return '';
   }
 
-  function renderSection(title, sectionKey, data) {
+  function renderSection(title, data) {
     if (!data) return '';
     let rows = '';
     for (const [key, val] of Object.entries(data)) {
       const lbl = labels[key] || key;
-      const origText = defaultText(val);
+      const text = defaultText(val);
       const style = defaultStyle(val);
-      const currentText = getVal(sectionKey, key, origText);
-      const isEdited = overrides[`${sectionKey}:${key}`] !== undefined
-                    && overrides[`${sectionKey}:${key}`] !== origText;
-      const cls = `outfit-value${style ? ' ' + style : ''}${isEdited ? ' edited' : ''}`;
+      const cls = `outfit-value${style ? ' ' + style : ''}`;
       rows += `<div class="outfit-row">
         <div class="outfit-label">${lbl}</div>
-        <div class="${cls}"
-          contenteditable="true"
-          data-section="${sectionKey}"
-          data-key="${key}"
-          data-orig="${origText.replace(/"/g, '&quot;')}"
-          spellcheck="false">${currentText}</div>
+        <div class="${cls}">${text}</div>
       </div>`;
     }
     return `<div class="outfit-section">
@@ -2686,40 +2580,13 @@ function renderOutfitModal() {
   if (!hasMorning && !hasAfternoon) {
     html += `<div class="outfit-empty">此時段暫無穿搭建議</div>`;
   } else if (hasMorning && hasAfternoon) {
-    html += renderSection('早上', 'morning', src.morning);
-    html += renderSection('下午 / 晚間', 'afternoon', src.afternoon);
+    html += renderSection('早上', src.morning);
+    html += renderSection('下午 / 晚間', src.afternoon);
   } else {
-    const sectionKey = hasMorning ? 'morning' : 'afternoon';
-    html += renderSection('全日', sectionKey, src.morning || src.afternoon);
+    html += renderSection('全日', src.morning || src.afternoon);
   }
 
   document.getElementById('outfitModalBody').innerHTML = html;
-
-  // 綁定 contenteditable blur 事件
-  document.querySelectorAll('#outfitModalBody [contenteditable]').forEach(el => {
-    el.addEventListener('blur', () => {
-      const section = el.dataset.section;
-      const key = el.dataset.key;
-      const orig = el.dataset.orig;
-      const newVal = el.textContent.trim();
-      if (newVal === orig) {
-        delete outfitOverridesCache[`${section}:${key}`];
-      } else {
-        outfitOverridesCache[`${section}:${key}`] = newVal;
-      }
-      saveOutfitOverrides(outfitCurrentDay, outfitOverridesCache);
-      if (newVal !== orig) {
-        el.classList.add('edited');
-      } else {
-        el.classList.remove('edited');
-      }
-      showSaveHint('已儲存 ✓');
-    });
-    // Enter 鍵完成編輯
-    el.addEventListener('keydown', e => {
-      if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
-    });
-  });
 }
 </script>
 </body>
