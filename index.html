@@ -776,6 +776,108 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
 #back-to-top.visible { opacity: 1; pointer-events: auto; }
 #back-to-top:hover { border-color: var(--gold-dim); color: var(--gold); }
 
+/* ── TOOLS ── */
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  padding: 0 0 32px;
+}
+.tool-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 22px 24px;
+}
+.tool-card-title {
+  display: flex; align-items: baseline; gap: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.tool-card-title-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; font-weight: 300; letter-spacing: 0.06em;
+  color: var(--text);
+}
+.tool-clear-btn {
+  display: block; margin-top: 8px;
+  background: none; border: none; padding: 0;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+  color: #333; cursor: pointer;
+  transition: color .15s;
+}
+.tool-clear-btn:hover { color: var(--dim); }
+.tool-rate-badge {
+  font-size: 9px; letter-spacing: .06em; color: var(--dim);
+  margin-left: auto; margin-right: 6px;
+}
+/* converter */
+.tool-converter {
+  display: flex; align-items: center; gap: 12px;
+}
+.tool-converter-field {
+  flex: 1; display: flex; flex-direction: column; gap: 5px;
+}
+.tool-converter-currency {
+  font-size: 11px; letter-spacing: .2em; color: var(--gold-dim);
+}
+.tool-converter-label {
+  font-size: 9px; letter-spacing: .12em; color: var(--dim); text-transform: uppercase;
+}
+.tool-converter-arrow {
+  font-size: 18px; color: #2e2e2e; flex-shrink: 0; padding-bottom: 4px;
+}
+/* inputs */
+.tool-input {
+  background: #0A0A0A; border: 1px solid #242424;
+  border-radius: 4px; padding: 10px 12px;
+  color: var(--text); font-family: 'DM Mono', monospace;
+  font-size: 15px; width: 100%;
+  transition: border-color .15s;
+  -moz-appearance: textfield;
+}
+.tool-input::-webkit-inner-spin-button,
+.tool-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.tool-input:focus { outline: none; border-color: var(--gold-dim); }
+.tool-input-lg { font-size: 20px; padding: 11px 14px; }
+.tool-label {
+  font-size: 9px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--dim);
+}
+.tool-note {
+  font-size: 10px; color: var(--dim); letter-spacing: .04em;
+  padding: 8px 12px;
+  background: #0d0d0d; border: 1px solid var(--border); border-radius: 3px;
+}
+/* VAT breakdown */
+.tool-vat-breakdown {
+  margin-top: 16px; border-top: 1px solid var(--border); padding-top: 14px;
+}
+.tool-vat-row {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: var(--dim);
+  padding: 4px 0; letter-spacing: .04em;
+}
+.tool-vat-row-divider { height: 1px; background: var(--border); margin: 12px 0; }
+.tool-vat-actual {
+  background: rgba(200,169,110,0.06);
+  border: 1px solid rgba(200,169,110,0.15);
+  border-radius: 4px; padding: 16px; text-align: center;
+}
+.tool-vat-actual-label {
+  font-size: 9px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--gold-dim); margin-bottom: 10px;
+}
+.tool-vat-actual-eur {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 38px; font-weight: 300;
+  color: var(--gold-lt); letter-spacing: .04em; line-height: 1.1;
+}
+.tool-vat-actual-twd {
+  font-size: 13px; color: var(--muted); margin-top: 5px; letter-spacing: .06em;
+}
 </style>
 </head>
 <body>
@@ -795,10 +897,71 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
     <button class="tab" data-day="6"><span class="day-num">3·19</span><span class="day-sub">Thu · 瑪黑</span></button>
     <button class="tab" data-day="7"><span class="day-num">3·20</span><span class="day-sub">Fri · 最後</span></button>
     <button class="tab" data-day="8"><span class="day-num">3·21</span><span class="day-sub">Sat · 回程</span></button>
+    <button class="tab" data-day="tools"><span class="day-num" style="font-size:11px;letter-spacing:.06em">工具</span><span class="day-sub">換算 · 退稅</span></button>
   </nav>
 </header>
 
 <main class="main">
+
+<!-- ══ TOOLS ══ -->
+<section class="day-view" id="day-tools">
+  <div style="padding:16px 0 20px;border-bottom:1px solid var(--border);margin-bottom:24px;display:flex;align-items:center;gap:12px;">
+    <span style="font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-dim);font-family:'DM Mono',monospace;">✦ 旅行工具</span>
+    <span style="font-size:9px;color:var(--border)">|</span>
+    <span style="font-size:9px;letter-spacing:.12em;color:var(--dim);font-family:'DM Mono',monospace;">匯率換算 · 退稅試算</span>
+  </div>
+
+  <div class="tools-grid">
+
+    <!-- 匯率換算 -->
+    <div class="tool-card">
+      <div class="tool-card-title">
+        <span class="tool-card-title-text">匯率換算</span>
+        <span class="tool-rate-badge" id="tools-rate-badge">載入中…</span>
+      </div>
+      <div class="tool-converter">
+        <div class="tool-converter-field">
+          <div class="tool-converter-currency">EUR</div>
+          <input class="tool-input tool-input-lg" id="tools-eur" type="number" placeholder="0" oninput="toolsCalcFromEUR()" />
+          <div class="tool-converter-label">歐元</div>
+        </div>
+        <div class="tool-converter-arrow">⇄</div>
+        <div class="tool-converter-field">
+          <div class="tool-converter-currency">TWD</div>
+          <input class="tool-input tool-input-lg" id="tools-twd" type="number" placeholder="0" oninput="toolsCalcFromTWD()" />
+          <div class="tool-converter-label">台幣</div>
+        </div>
+      </div>
+      <button class="tool-clear-btn" onclick="toolsClearConverter()">清空</button>
+    </div>
+
+    <!-- 退稅試算 -->
+    <div class="tool-card">
+      <div class="tool-card-title">
+        <span class="tool-card-title-text">退稅試算</span>
+        <span style="font-size:9px;color:var(--dim);letter-spacing:.08em;text-transform:none;margin-left:10px;">VAT 20% · 退約 12%</span>
+      </div>
+      <div class="tool-note">退稅門檻：單店消費 ≥ €100.01（含稅）</div>
+      <div style="margin-top:14px">
+        <div class="tool-label">消費金額 EUR（含稅）</div>
+        <input class="tool-input tool-input-lg" id="vat-amount" type="number" placeholder="0" oninput="toolsCalcVAT()" style="margin-top:6px" />
+        <button class="tool-clear-btn" onclick="toolsClearVAT()" style="margin-top:8px">清空</button>
+      </div>
+      <div id="vat-warn-inline" style="display:none;margin-top:10px;font-size:10px;color:#E07070;letter-spacing:.06em;"></div>
+      <div class="tool-vat-breakdown" id="vat-breakdown" style="display:none">
+        <div class="tool-vat-row"><span>含稅金額</span><span id="vat-gross-disp">—</span></div>
+        <div class="tool-vat-row"><span>退稅金額（約 12%）</span><span id="vat-refund-disp" style="color:var(--gold-dim)">—</span></div>
+        <div class="tool-vat-row-divider"></div>
+        <div class="tool-vat-actual">
+          <div class="tool-vat-actual-label">退稅後實際費用</div>
+          <div class="tool-vat-actual-eur" id="vat-actual-eur">—</div>
+          <div class="tool-vat-actual-twd" id="vat-actual-twd">—</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
 
 
 <!-- ══ 13 ══ -->
@@ -2368,6 +2531,10 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeResto
 
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
+    // 離開工具頁時自動清空
+    const currentActive = document.querySelector('.tab.active');
+    if (currentActive && currentActive.dataset.day === 'tools') toolsClearAll();
+
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.day-view').forEach(d => d.classList.remove('active'));
     tab.classList.add('active');
@@ -2375,6 +2542,7 @@ document.querySelectorAll('.tab').forEach(tab => {
     const section = document.getElementById('day-' + day);
     if (section) section.classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (day === 'tools') toolsInit();
   });
 });
 
@@ -2700,6 +2868,75 @@ function renderOutfitModal() {
   }, { passive: true });
 })();
 
+// ── TOOLS ────────────────────────────────────────────────────────────────────
+let toolsReady = false;
+
+function toolsInit() {
+  if (toolsReady) return;
+  toolsReady = true;
+  const badge = document.getElementById('tools-rate-badge');
+  if (!badge) return;
+  const update = () => { badge.textContent = `1 EUR ≈ ${RATE.toFixed(1)} TWD${RATE_LOADED ? '' : '（參考值）'}`; };
+  update();
+  if (!RATE_LOADED) {
+    const t = setInterval(() => { if (RATE_LOADED) { update(); clearInterval(t); } }, 500);
+  }
+}
+
+function toolsClearConverter() {
+  document.getElementById('tools-eur').value = '';
+  document.getElementById('tools-twd').value = '';
+}
+
+function toolsClearVAT() {
+  document.getElementById('vat-amount').value = '';
+  document.getElementById('vat-breakdown').style.display = 'none';
+  document.getElementById('vat-warn-inline').style.display = 'none';
+}
+
+function toolsClearAll() {
+  toolsClearConverter();
+  toolsClearVAT();
+}
+
+function toolsCalcFromTWD() {
+  const twd = parseFloat(document.getElementById('tools-twd').value);
+  document.getElementById('tools-eur').value = (!isNaN(twd) && twd > 0) ? (twd / RATE).toFixed(2) : '';
+}
+
+function toolsCalcFromEUR() {
+  const eur = parseFloat(document.getElementById('tools-eur').value);
+  document.getElementById('tools-twd').value = (!isNaN(eur) && eur > 0) ? (eur * RATE).toFixed(0) : '';
+}
+
+function toolsCalcVAT() {
+  const gross = parseFloat(document.getElementById('vat-amount').value);
+  const breakdown = document.getElementById('vat-breakdown');
+  const warnEl = document.getElementById('vat-warn-inline');
+
+  if (!isNaN(gross) && gross > 0) {
+    const refund = gross * 0.12;
+    const actual = gross - refund;
+    const actualTWD = Math.round(actual * RATE);
+    const refundTWD = Math.round(refund * RATE);
+
+    document.getElementById('vat-gross-disp').textContent = `€ ${gross.toFixed(2)}`;
+    document.getElementById('vat-refund-disp').textContent = `− € ${refund.toFixed(2)}  (≈ NT$ ${refundTWD.toLocaleString()})`;
+    document.getElementById('vat-actual-eur').textContent = `€ ${actual.toFixed(2)}`;
+    document.getElementById('vat-actual-twd').textContent = `≈ NT$ ${actualTWD.toLocaleString()}`;
+
+    if (gross < 100.01) {
+      warnEl.textContent = '⚠ 未達門檻 €100.01，無法辦理退稅';
+      warnEl.style.display = 'block';
+    } else {
+      warnEl.style.display = 'none';
+    }
+    breakdown.style.display = 'block';
+  } else {
+    breakdown.style.display = 'none';
+    warnEl.style.display = 'none';
+  }
+}
 </script>
 </body>
 </html>
