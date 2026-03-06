@@ -664,7 +664,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
 
 /* tips strip */
 .outfit-tips {
-  margin: 14px 20px 0;
+  margin: 14px 20px 20px;
   padding: 10px 14px;
   background: #0D0C0A;
   border: 1px solid #2A2518;
@@ -688,17 +688,43 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
 
 /* sections */
 .outfit-section {
-  padding: 16px 20px 4px;
-  border-bottom: 1px solid #1A1A1A;
+  padding: 0 0 4px;
 }
-.outfit-section:last-child { border-bottom: none; padding-bottom: 18px; }
+.outfit-section:last-child { padding-bottom: 0; }
+
 .outfit-section-title {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 20px 8px;
+  margin-bottom: 0;
   font-size: 9px; letter-spacing: 0.28em; text-transform: uppercase;
-  color: var(--dim); margin-bottom: 10px;
-  display: flex; align-items: center; gap: 8px;
 }
-.outfit-section-title::after {
-  content: ''; flex: 1; height: 1px; background: #1E1E1E;
+.outfit-section.morning .outfit-section-title {
+  background: rgba(200,169,110,0.07);
+  border-top: 1px solid rgba(200,169,110,0.12);
+  border-bottom: 1px solid rgba(200,169,110,0.12);
+  color: var(--gold-dim);
+}
+.outfit-section.afternoon .outfit-section-title {
+  background: rgba(255,255,255,0.03);
+  border-top: 1px solid #1e1e1e;
+  border-bottom: 1px solid #1e1e1e;
+  color: var(--dim);
+}
+.outfit-section-title::before {
+  content: '';
+  display: inline-block; width: 4px; height: 4px; border-radius: 50%;
+  flex-shrink: 0;
+}
+.outfit-section.morning .outfit-section-title::before {
+  background: var(--gold-dim);
+}
+.outfit-section.afternoon .outfit-section-title::before {
+  background: #3a3a3a;
+}
+.outfit-section-title::after { display: none; }
+
+.outfit-section-body {
+  padding: 14px 20px 16px;
 }
 
 /* item rows */
@@ -731,13 +757,29 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
   border-radius: 3px; font-size: 10.5px; color: var(--dim);
   letter-spacing: 0.06em; display: flex; align-items: center; gap: 8px;
 }
+.outfit-wx-note:last-of-type { margin-bottom: 20px; }
 .outfit-wx-note .temp { color: #6EB8F0; font-weight: 500; }
 
 
 
+/* ── BACK TO TOP ── */
+#back-to-top {
+  position: fixed; bottom: 28px; right: 24px; z-index: 200;
+  width: 38px; height: 38px; border-radius: 50%;
+  background: #1a1a1a; border: 1px solid var(--border);
+  color: var(--gold-dim); font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; opacity: 0; pointer-events: none;
+  transition: opacity .25s, border-color .2s, color .2s;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+#back-to-top.visible { opacity: 1; pointer-events: auto; }
+#back-to-top:hover { border-color: var(--gold-dim); color: var(--gold); }
+
 </style>
 </head>
 <body>
+<button id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="返回頂部">↑</button>
 
 <header class="site-header">
   <div class="header-top">
@@ -2029,6 +2071,25 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
 
   // 並行抓取預報 + 歷史，有預報優先，沒有才用歷史
   (async function() {
+    var CACHE_KEY = 'wx_cache_paris2026';
+    var CACHE_TTL = 60 * 60 * 1000; // 1小時
+
+    // 嘗試讀取 cache
+    try {
+      var cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        var c = JSON.parse(cached);
+        if (Date.now() - c.ts < CACHE_TTL) {
+          for (var i = 0; i < DAYS.length; i++) {
+            var day = DAYS[i];
+            var gotF = c.fj && applyData(c.fj, day.date, day.id, null);
+            if (!gotF) c.hj && applyData(c.hj, day.hist, day.id, '去年同期參考資料');
+          }
+          return; // cache 命中，不發 API
+        }
+      }
+    } catch(e) {}
+
     var fUrl = 'https://api.open-meteo.com/v1/forecast?latitude=48.8566&longitude=2.3522'
       + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max'
       + '&hourly=temperature_2m,precipitation_probability'
@@ -2045,12 +2106,10 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
     var fj = results[0].status === 'fulfilled' && results[0].value && !results[0].value.error ? results[0].value : null;
     var hj = results[1].status === 'fulfilled' && results[1].value && !results[1].value.error ? results[1].value : null;
 
-    // Debug
-    if (fj) {
-      var fdates = fj.daily && fj.daily.time;
-      var fhours = fj.hourly && fj.hourly.time;
-      } else {
-    }
+    // 寫入 cache
+    try {
+      if (fj || hj) localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), fj: fj, hj: hj }));
+    } catch(e) {}
 
     // 逐天判斷：有即時預報用預報，沒有才 fallback 歷史 API
     for (var i = 0; i < DAYS.length; i++) {
@@ -2569,7 +2628,7 @@ function renderOutfitModal() {
     return '';
   }
 
-  function renderSection(title, data) {
+  function renderSection(title, data, sectionClass) {
     if (!data) return '';
     let rows = '';
     for (const [key, val] of Object.entries(data)) {
@@ -2582,9 +2641,10 @@ function renderOutfitModal() {
         <div class="${cls}">${text}</div>
       </div>`;
     }
-    return `<div class="outfit-section">
+    const extraClass = sectionClass ? ` ${sectionClass}` : '';
+    return `<div class="outfit-section${extraClass}">
       <div class="outfit-section-title">${title}</div>
-      ${rows}
+      <div class="outfit-section-body">${rows}</div>
     </div>`;
   }
 
@@ -2623,14 +2683,23 @@ function renderOutfitModal() {
   if (!hasMorning && !hasAfternoon) {
     html += `<div class="outfit-empty">此時段暫無穿搭建議</div>`;
   } else if (hasMorning && hasAfternoon) {
-    html += renderSection('早上', src.morning);
-    html += renderSection('下午 / 晚間', src.afternoon);
+    html += renderSection('早上', src.morning, 'morning');
+    html += renderSection('下午 / 晚間', src.afternoon, 'afternoon');
   } else {
-    html += renderSection('全日', src.morning || src.afternoon);
+    html += renderSection('全日', src.morning || src.afternoon, '');
   }
 
   document.getElementById('outfitModalBody').innerHTML = html;
 }
+
+// ── BACK TO TOP ──────────────────────────────────────────────────────────────
+(function() {
+  var btn = document.getElementById('back-to-top');
+  window.addEventListener('scroll', function() {
+    btn.classList.toggle('visible', window.scrollY > 300);
+  }, { passive: true });
+})();
+
 </script>
 </body>
 </html>
