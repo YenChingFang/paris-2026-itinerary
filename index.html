@@ -95,7 +95,7 @@ body {
 }
 
 /* ── MAIN ── */
-.main { max-width: 1100px; margin: 0 auto; padding: 44px 28px 100px; }
+.main { max-width: 1100px; margin: 0 auto; padding: 44px 28px 160px; }
 
 /* ── DAY HEADER ── */
 .day-header {
@@ -878,6 +878,111 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
 .tool-vat-actual-twd {
   font-size: 13px; color: var(--muted); margin-top: 5px; letter-spacing: .06em;
 }
+
+/* ── RESTAURANT LIST PAGE ── */
+.resto-section-label {
+  font-size: 9px; letter-spacing: .24em; text-transform: uppercase;
+  color: var(--gold-dim); margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.resto-section-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+.resto-list {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.resto-card {
+  display: flex; align-items: stretch; justify-content: space-between;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold-dim);
+  border-radius: 5px;
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: background .15s, border-left-color .15s;
+  gap: 16px;
+}
+.resto-card:hover { background: #1E1C14; border-left-color: var(--gold); }
+.resto-card.casual { border-left-color: #2E2E2E; }
+.resto-card.casual:hover { border-left-color: var(--gold-dim); }
+.resto-card-left { flex: 1; min-width: 0; }
+.resto-card-right {
+  display: flex; flex-direction: column; align-items: flex-end;
+  justify-content: space-between; gap: 10px; flex-shrink: 0;
+}
+.resto-card-stars {
+  font-size: 10px; letter-spacing: .1em; color: var(--gold);
+  margin-bottom: 4px;
+}
+.resto-card-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px; font-weight: 300; color: var(--gold-lt); letter-spacing: .03em;
+  line-height: 1.2; margin-bottom: 3px;
+}
+.resto-card-meta {
+  font-size: 10px; color: var(--dim); letter-spacing: .08em; margin-bottom: 5px;
+}
+.resto-card-cuisine {
+  font-size: 11px; color: var(--muted); margin-bottom: 10px; font-style: italic;
+}
+.resto-card-dishes { display: flex; flex-wrap: wrap; gap: 5px; }
+.dish-pill {
+  font-size: 10px; letter-spacing: .04em;
+  padding: 3px 8px; border-radius: 3px;
+  background: #0F0F0F; border: 1px solid #2A2A2A; color: var(--muted);
+}
+.dish-pill.highlight {
+  background: rgba(200,169,110,0.08); border-color: rgba(200,169,110,0.2);
+  color: var(--gold-dim);
+}
+.resto-card-map {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--gold-dim); text-decoration: none;
+  border: 1px solid #3A3020; border-radius: 3px;
+  padding: 5px 10px; transition: all .15s; white-space: nowrap;
+}
+.resto-card-map:hover { color: var(--gold); border-color: var(--gold-dim); background: rgba(200,169,110,0.07); }
+.resto-card-map svg { width: 10px; height: 10px; }
+.resto-card-badge {
+  font-size: 9px; letter-spacing: .06em;
+  color: var(--gold-dim); padding: 4px 8px;
+  border: 1px solid #3A3020; border-radius: 3px;
+  background: rgba(200,169,110,0.04);
+  white-space: nowrap;
+}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+  background: rgba(10,10,10,0.97);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.bottom-nav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px; padding: 12px 4px 13px;
+  background: none; border: none; cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  color: var(--dim); 
+  -webkit-tap-highlight-color: transparent;
+  border-top: 2px solid transparent;
+  transition: all .2s;
+  position: relative;
+}
+.bottom-nav-item + .bottom-nav-item { border-left: 1px solid var(--border); }
+.bottom-nav-item:hover { color: var(--muted); background: rgba(255,255,255,0.02); }
+.bottom-nav-item.active { color: var(--gold); border-top-color: var(--gold); background: rgba(200,169,110,0.04); }
+.bottom-nav-item .bnav-icon { font-size: 20px; line-height: 1; }
+.bottom-nav-item .bnav-label { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; }
+
+/* adjust main bottom padding to not hide under bottom nav */
+.main { padding-bottom: 200px; }
+.bottom-spacer { height: 80px; }
 </style>
 </head>
 <body>
@@ -897,18 +1002,26 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
     <button class="tab" data-day="6"><span class="day-num">3·19</span><span class="day-sub">Thu · 瑪黑</span></button>
     <button class="tab" data-day="7"><span class="day-num">3·20</span><span class="day-sub">Fri · 最後</span></button>
     <button class="tab" data-day="8"><span class="day-num">3·21</span><span class="day-sub">Sat · 回程</span></button>
-    <button class="tab" data-day="tools"><span class="day-num" style="font-size:11px;letter-spacing:.06em">工具</span><span class="day-sub">換算 · 退稅</span></button>
   </nav>
 </header>
 
-<main class="main">
+<!-- ── BOTTOM NAV ── -->
+<nav class="bottom-nav" id="bottomNav">
+  <button class="bottom-nav-item active" data-view="itinerary" id="bnav-itinerary" onclick="switchBottomTab('itinerary')">
+    <span class="bnav-icon">🗓</span>
+  </button>
+  <button class="bottom-nav-item" data-view="restaurants" id="bnav-restaurants" onclick="switchBottomTab('restaurants')">
+    <span class="bnav-icon">🍽</span>
+  </button>
+  <button class="bottom-nav-item" data-view="tools" id="bnav-tools" onclick="switchBottomTab('tools')">
+    <span class="bnav-icon">🧮</span>
+  </button>
+</nav>
 
 <!-- ══ TOOLS ══ -->
 <section class="day-view" id="day-tools">
-  <div style="padding:16px 0 20px;border-bottom:1px solid var(--border);margin-bottom:24px;display:flex;align-items:center;gap:12px;">
-    <span style="font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-dim);font-family:'DM Mono',monospace;">✦ 旅行工具</span>
-    <span style="font-size:9px;color:var(--border)">|</span>
-    <span style="font-size:9px;letter-spacing:.12em;color:var(--dim);font-family:'DM Mono',monospace;">匯率換算 · 退稅試算</span>
+  <div style="padding:20px 0 22px;border-bottom:1px solid var(--border);margin-bottom:24px;">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--gold-lt);letter-spacing:0.04em;line-height:1;">Travel Tools</div>
   </div>
 
   <div class="tools-grid">
@@ -1335,9 +1448,9 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
           <div class="time-end">→ 09:45</div>
           <div class="time-stay">45 min</div>
         </td>
-        <td class="td-place"><span class="place-name">La Crème de Paris Notre-Dame</span><a class="map-link" href="https://maps.google.com/?q=La+Crème+de+Paris+4+Rue+des+Grands+Degrés+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
+        <td class="td-place"><span class="place-name">巴黎聖母院</span><a class="map-link" href="https://maps.google.com/?q=Cathédrale+Notre-Dame+de+Paris" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖</a></td>
         <td class="td-trans"><div class="trans-wrap"><span class="trans-badge none">— 出發點</span></div></td>
-        <td class="td-note">早餐咖啡＋可頌，飯店步行即達</td>
+        <td class="td-note">2024 年底重新開放，外觀壯麗，飯店步行即達</td>
       </tr>
 <tr class="schedule-row alt">
         <td class="td-time">
@@ -2008,7 +2121,274 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
   </div>
 </section>
 
-<!-- ══ RESTAURANT MODAL ══ -->
+<!-- ══ RESTAURANT LIST ══ -->
+<section class="day-view" id="day-restaurants">
+
+  <div style="padding:20px 0 22px;border-bottom:1px solid var(--border);margin-bottom:28px;">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--gold-lt);letter-spacing:0.04em;line-height:1;">Restaurants</div>
+  </div>
+
+  <!-- 米其林三星 -->
+  <div class="resto-section-label">★★★ 米其林三星</div>
+  <div class="resto-list">
+
+    <div class="resto-card" onclick="openRestoModal('plenitude')">
+      <div class="resto-card-left">
+        <div class="resto-card-stars">★★★</div>
+        <div class="resto-card-name">Plénitude</div>
+        <div class="resto-card-meta">Cheval Blanc Paris · 3/14 晚餐</div>
+        <div class="resto-card-cuisine">當代法式 · 奢華體驗</div>
+        <div class="resto-card-dishes">
+          <span class="dish-pill">Menu Symphony €495/人</span>
+        </div>
+      </div>
+      <div class="resto-card-right">
+        <a class="resto-card-map" href="https://maps.google.com/?q=Plénitude+Cheval+Blanc+Paris+8+Quai+du+Louvre" target="_blank" onclick="event.stopPropagation()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖
+        </a>
+        <div class="resto-card-badge">🍽 菜單</div>
+      </div>
+    </div>
+
+    <div class="resto-card" onclick="openRestoModal('arpege')">
+      <div class="resto-card-left">
+        <div class="resto-card-stars">★★★</div>
+        <div class="resto-card-name">Arpège</div>
+        <div class="resto-card-meta">84 Rue de Varenne · 3/16 午餐</div>
+        <div class="resto-card-cuisine">蔬食哲學 · Alain Passard</div>
+        <div class="resto-card-dishes">
+          <span class="dish-pill">午餐蔬食套餐 €260/人</span>
+          <span class="dish-pill highlight">全蔬食體驗</span>
+        </div>
+      </div>
+      <div class="resto-card-right">
+        <a class="resto-card-map" href="https://maps.google.com/?q=Restaurant+Arpège+84+Rue+de+Varenne+Paris" target="_blank" onclick="event.stopPropagation()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖
+        </a>
+        <div class="resto-card-badge">🍽 菜單</div>
+      </div>
+    </div>
+
+    <div class="resto-card" onclick="openRestoModal('lecinq')">
+      <div class="resto-card-left">
+        <div class="resto-card-stars">★★★</div>
+        <div class="resto-card-name">Le Cinq</div>
+        <div class="resto-card-meta">Four Seasons George V · 3/17 晚餐</div>
+        <div class="resto-card-cuisine">經典法式 · 宮殿飯店</div>
+        <div class="resto-card-dishes">
+          <span class="dish-pill">螯蝦 Langoustines €185</span>
+          <span class="dish-pill">義大利麵 €210</span>
+          <span class="dish-pill highlight">正裝必備</span>
+        </div>
+      </div>
+      <div class="resto-card-right">
+        <a class="resto-card-map" href="https://maps.google.com/?q=Le+Cinq+Four+Seasons+Hotel+George+V+31+Avenue+George+V+Paris" target="_blank" onclick="event.stopPropagation()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖
+        </a>
+        <div class="resto-card-badge">🍽 菜單</div>
+      </div>
+    </div>
+
+    <div class="resto-card" onclick="openRestoModal('lecatelan')">
+      <div class="resto-card-left">
+        <div class="resto-card-stars">★★★</div>
+        <div class="resto-card-name">Le Pré Catelan</div>
+        <div class="resto-card-meta">布隆尼森林 · 3/18 午餐</div>
+        <div class="resto-card-cuisine">森林秘境 · Frédéric Anton</div>
+        <div class="resto-card-dishes">
+          <span class="dish-pill">午餐套餐 €195/人</span>
+          <span class="dish-pill highlight">Le Nôtre 花園旁</span>
+        </div>
+      </div>
+      <div class="resto-card-right">
+        <a class="resto-card-map" href="https://maps.google.com/?q=Le+Pré+Catelan+Bois+de+Boulogne+Paris" target="_blank" onclick="event.stopPropagation()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖
+        </a>
+        <div class="resto-card-badge">🍽 菜單</div>
+      </div>
+    </div>
+
+    <div class="resto-card" onclick="openRestoModal('ambroisie')">
+      <div class="resto-card-left">
+        <div class="resto-card-stars">★★★</div>
+        <div class="resto-card-name">L'Ambroisie</div>
+        <div class="resto-card-meta">9 Place des Vosges · 3/19 午餐</div>
+        <div class="resto-card-cuisine">皇家法式 · Bernard Pacaud</div>
+        <div class="resto-card-dishes">
+          <span class="dish-pill">螯蝦千層酥 €145</span>
+          <span class="dish-pill">松露派 €300</span>
+          <span class="dish-pill">布列斯雞 €380</span>
+          <span class="dish-pill highlight">全西裝</span>
+        </div>
+      </div>
+      <div class="resto-card-right">
+        <a class="resto-card-map" href="https://maps.google.com/?q=L'Ambroisie+9+Place+des+Vosges+Paris" target="_blank" onclick="event.stopPropagation()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖
+        </a>
+        <div class="resto-card-badge">🍽 菜單</div>
+      </div>
+    </div>
+
+    <div class="resto-card" onclick="openRestoModal('kei')">
+      <div class="resto-card-left">
+        <div class="resto-card-stars">★★★</div>
+        <div class="resto-card-name">Restaurant Kei</div>
+        <div class="resto-card-meta">5 Rue du Coq Héron · 3/20 午餐</div>
+        <div class="resto-card-cuisine">日法融合 · Kei Kobayashi</div>
+        <div class="resto-card-dishes">
+          <span class="dish-pill">午餐套餐 €185/人</span>
+          <span class="dish-pill highlight">日本主廚三星</span>
+        </div>
+      </div>
+      <div class="resto-card-right">
+        <a class="resto-card-map" href="https://maps.google.com/?q=Restaurant+Kei+5+Rue+du+Coq+Héron+Paris" target="_blank" onclick="event.stopPropagation()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖
+        </a>
+        <div class="resto-card-badge">🍽 菜單</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 其他餐廳 -->
+  <div class="resto-section-label" style="margin-top:32px">✦ 其他餐廳 · 咖啡 · 小館</div>
+  <div class="resto-list">
+
+    <div class="resto-card casual">
+      <div class="resto-card-left">
+        <div class="resto-card-stars" style="color:var(--gold-dim)">★ 米其林一星</div>
+        <div class="resto-card-name">Le Tout-Paris</div>
+        <div class="resto-card-meta">Cheval Blanc 7F · 3/15 早午餐</div>
+        <div class="resto-card-cuisine">當代法式 · 巴黎全景</div>
+        <div class="resto-card-dishes">
+          <span class="dish-pill">早午餐套餐</span>
+          <span class="dish-pill highlight">塞納河景觀</span>
+        </div>
+      </div>
+      <div class="resto-card-right">
+        <a class="resto-card-map" href="https://maps.google.com/?q=Le+Tout-Paris+Cheval+Blanc+8+Quai+du+Louvre" target="_blank" onclick="event.stopPropagation()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖
+        </a>
+      </div>
+    </div>
+
+    <div class="resto-card casual">
+      <div class="resto-card-left">
+        <div class="resto-card-stars" style="color:var(--dim)">宮殿早餐</div>
+        <div class="resto-card-name">Ore – Ducasse au Château</div>
+        <div class="resto-card-meta">凡爾賽宮殿 · 3/17 早餐</div>
+        <div class="resto-card-cuisine">Alain Ducasse · 宮殿正門旁</div>
+        <div class="resto-card-dishes">
+          <span class="dish-pill">早餐套餐</span>
+          <span class="dish-pill highlight">入宮前首選</span>
+        </div>
+      </div>
+      <div class="resto-card-right">
+        <a class="resto-card-map" href="https://maps.google.com/?q=Restaurant+Ore+Château+de+Versailles" target="_blank" onclick="event.stopPropagation()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖
+        </a>
+      </div>
+    </div>
+
+    <div class="resto-card casual" onclick="openRestoModal('fernand')">
+      <div class="resto-card-left">
+        <div class="resto-card-stars" style="color:var(--dim)">傳統法式小館</div>
+        <div class="resto-card-name">Chez Fernand Christine</div>
+        <div class="resto-card-meta">左岸 · 3/15 晚餐</div>
+        <div class="resto-card-cuisine">家常法菜 · 溫馨氣氛</div>
+        <div class="resto-card-dishes">
+          <span class="dish-pill">洋蔥湯 €14.5</span>
+          <span class="dish-pill">紅酒燉牛 €36.5</span>
+          <span class="dish-pill">蝸牛 €16.5</span>
+        </div>
+      </div>
+      <div class="resto-card-right">
+        <a class="resto-card-map" href="https://maps.google.com/?q=Chez+Fernand+Christine+Paris" target="_blank" onclick="event.stopPropagation()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖
+        </a>
+        <div class="resto-card-badge">🍽 菜單</div>
+      </div>
+    </div>
+
+    <div class="resto-card casual">
+      <div class="resto-card-left">
+        <div class="resto-card-stars" style="color:var(--dim)">早餐咖啡館</div>
+        <div class="resto-card-name">Bonjour Jacob</div>
+        <div class="resto-card-meta">左岸附近 · 3/18 早餐</div>
+        <div class="resto-card-cuisine">輕食咖啡 · 開啟美好一天</div>
+        <div class="resto-card-dishes">
+          <span class="dish-pill">咖啡＋可頌</span>
+        </div>
+      </div>
+      <div class="resto-card-right">
+        <a class="resto-card-map" href="https://maps.google.com/?q=Bonjour+Jacob+Paris" target="_blank" onclick="event.stopPropagation()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖
+        </a>
+      </div>
+    </div>
+
+    <div class="resto-card casual" onclick="openRestoModal('spitisou')">
+      <div class="resto-card-left">
+        <div class="resto-card-stars" style="color:var(--dim)">希臘料理</div>
+        <div class="resto-card-name">Spiti Sou</div>
+        <div class="resto-card-meta">歌劇院區 · 3/18 晚餐</div>
+        <div class="resto-card-cuisine">地中海風味 · 輕鬆氣氛</div>
+        <div class="resto-card-dishes">
+          <span class="dish-pill">前菜三重奏 €21</span>
+          <span class="dish-pill">烤羊排 €70</span>
+          <span class="dish-pill">燉肉米麵 €38</span>
+        </div>
+      </div>
+      <div class="resto-card-right">
+        <a class="resto-card-map" href="https://maps.google.com/?q=Spiti+Sou+Paris" target="_blank" onclick="event.stopPropagation()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖
+        </a>
+        <div class="resto-card-badge">🍽 菜單</div>
+      </div>
+    </div>
+
+    <div class="resto-card casual" onclick="openRestoModal('kechuan')">
+      <div class="resto-card-left">
+        <div class="resto-card-stars" style="color:var(--dim)">越南料理</div>
+        <div class="resto-card-name">Ke Chuan</div>
+        <div class="resto-card-meta">瑪黑區 · 3/19 晚餐</div>
+        <div class="resto-card-cuisine">越南河粉 · 換口味之選</div>
+        <div class="resto-card-dishes">
+          <span class="dish-pill">河粉 Pho €13</span>
+          <span class="dish-pill">春捲 €6</span>
+        </div>
+      </div>
+      <div class="resto-card-right">
+        <a class="resto-card-map" href="https://maps.google.com/?q=Paris+Vietnamese+restaurant+Marais" target="_blank" onclick="event.stopPropagation()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖
+        </a>
+        <div class="resto-card-badge">🍽 菜單</div>
+      </div>
+    </div>
+
+    <div class="resto-card casual" onclick="openRestoModal('le703')">
+      <div class="resto-card-left">
+        <div class="resto-card-stars" style="color:var(--dim)">阿爾薩斯風味</div>
+        <div class="resto-card-name">Restaurant Le 703</div>
+        <div class="resto-card-meta">香榭麗舍區 · 3/20 晚餐</div>
+        <div class="resto-card-cuisine">法式溫馨告別晚宴</div>
+        <div class="resto-card-dishes">
+          <span class="dish-pill">陶罐燉雞 €78</span>
+          <span class="dish-pill">阿爾薩斯氣泡酒 €64</span>
+          <span class="dish-pill highlight">告別晚宴</span>
+        </div>
+      </div>
+      <div class="resto-card-right">
+        <a class="resto-card-map" href="https://maps.google.com/?q=Restaurant+Le+703+Paris" target="_blank" onclick="event.stopPropagation()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>地圖
+        </a>
+        <div class="resto-card-badge">🍽 菜單</div>
+      </div>
+    </div>
+
+  </div>
+  <div class="bottom-spacer"></div>
+</section>
 <div class="resto-modal-overlay" id="restoModalOverlay" onclick="closeRestoModal(event)">
   <div class="resto-modal" id="restoModal">
     <div class="resto-modal-head">
@@ -2531,10 +2911,6 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeResto
 
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
-    // 離開工具頁時自動清空
-    const currentActive = document.querySelector('.tab.active');
-    if (currentActive && currentActive.dataset.day === 'tools') toolsClearAll();
-
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.day-view').forEach(d => d.classList.remove('active'));
     tab.classList.add('active');
@@ -2542,9 +2918,41 @@ document.querySelectorAll('.tab').forEach(tab => {
     const section = document.getElementById('day-' + day);
     if (section) section.classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    if (day === 'tools') toolsInit();
   });
 });
+
+// ── BOTTOM 2-TAB SWITCH ──────────────────────────────────────────────────────
+let currentBottomTab = 'itinerary';
+
+function switchBottomTab(view) {
+  currentBottomTab = view;
+
+  // update bottom nav active state
+  document.getElementById('bnav-itinerary').classList.toggle('active', view === 'itinerary');
+  document.getElementById('bnav-restaurants').classList.toggle('active', view === 'restaurants');
+  document.getElementById('bnav-tools').classList.toggle('active', view === 'tools');
+
+  if (view === 'tools') {
+    document.querySelectorAll('.day-view').forEach(d => d.classList.remove('active'));
+    document.getElementById('day-tools').classList.add('active');
+    document.querySelector('.tabs').style.display = 'none';
+    toolsInit();
+  } else if (view === 'restaurants') {
+    document.querySelectorAll('.day-view').forEach(d => d.classList.remove('active'));
+    document.getElementById('day-restaurants').classList.add('active');
+    document.querySelector('.tabs').style.display = 'none';
+  } else {
+    // itinerary
+    document.querySelector('.tabs').style.display = '';
+    document.getElementById('day-tools').classList.remove('active');
+    document.getElementById('day-restaurants').classList.remove('active');
+    const activeTab = document.querySelector('.tab.active');
+    const day = activeTab ? activeTab.dataset.day : '0';
+    const section = document.getElementById('day-' + day);
+    if (section) section.classList.add('active');
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
 // 自動切換到當日 tab
 (function() {
