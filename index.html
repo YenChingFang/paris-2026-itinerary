@@ -983,6 +983,11 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
 /* adjust main bottom padding to not hide under bottom nav */
 .main { padding-bottom: 200px; }
 .bottom-spacer { height: 80px; }
+
+/* 每日行程 section 底部加足夠 padding，避免被底部 tab 列遮住 */
+.day-view {
+  padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px));
+}
 </style>
 </head>
 <body>
@@ -1309,7 +1314,7 @@ td { padding: 14px 16px; vertical-align: middle; background: #0F0F0F; }
     <div class="day-date">15</div>
     <div class="day-info">
       <div class="day-weekday">March 2026 · Sunday</div>
-      <div class="day-label">羅浮宮・搬飯店</div>
+      <div class="day-label">羅浮宮</div>
     </div>
     <div class="day-header-right">
       <div class="wx-outfit-wrap"><div class="wx-wrap" id="wx-wrap-day-2"></div>
